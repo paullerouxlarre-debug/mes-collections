@@ -1,0 +1,14 @@
+{
+  "name": "Mes Collections",
+  "short_name": "Collections",
+  "description": "Cartes postales d'Ondres et album des pièces de 2 €",
+  "lang": "fr",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F4F2EC",
+  "theme_color": "#1B6FB8",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
