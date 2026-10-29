@@ -496,8 +496,9 @@ details.more[open] summary svg{transform:rotate(90deg)}
 .tpill.U{background:var(--accent-soft);color:var(--accent)}
 /* coin detail */
 .cflip{perspective:1400px;width:min(250px,64vw);margin:4px auto 0;cursor:pointer}
-.cflip-in{position:relative;aspect-ratio:1;transform-style:preserve-3d;transition:transform .9s var(--spring);animation:coinIn .9s var(--spring) both}
-@keyframes coinIn{from{transform:rotateY(-160deg) scale(.6);opacity:0}to{transform:none;opacity:1}}
+.cflip{animation:coinIn .8s var(--spring) backwards}
+.cflip-in{position:relative;aspect-ratio:1;transform-style:preserve-3d;transition:transform .9s var(--spring)}
+@keyframes coinIn{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
 .cflip.turned .cflip-in{transform:rotateY(180deg)}
 .cface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:50%;filter:drop-shadow(0 14px 24px rgba(0,0,0,.3))}
 .cface.back{transform:rotateY(180deg)}
@@ -705,6 +706,57 @@ html.t-xl .grid{--col:260px!important}html.t-xl .cgrid{grid-template-columns:rep
 html.t-xl .toast{font-size:18px;padding:15px 22px}html.t-xl .sh-h h2{font-size:19px}
 html.t-xl .ch-body p{font-size:17px}html.t-xl .ch-meta span{font-size:15px}
 
+
+/* ---------- formulaire plein écran ---------- */
+.sheet.xl{width:min(1360px,100%);height:calc(100% - 18px - env(safe-area-inset-top,0px));max-height:none}
+@media (min-width:820px){.sheet.xl{width:min(1360px,calc(100% - 32px));height:min(900px,calc(100% - 32px));max-height:none}}
+.sheet.xl .sh-h{padding-block:14px}
+.sheet.xl .sh-h h2{font:750 22px var(--f-title);letter-spacing:-.02em}
+.sheet.xl .sh-b{flex:1;min-height:0;overflow:hidden;padding-block:14px}
+.bf{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:22px;height:100%}
+@media (max-width:899px){.bf{grid-template-columns:minmax(0,1fr);height:auto}.sheet.xl .sh-b{overflow-y:auto}}
+.bf-photos{display:grid;grid-template-rows:minmax(0,1.55fr) minmax(0,1fr);gap:14px;min-height:0}
+@media (max-width:899px){.bf-photos{grid-template-rows:none;grid-template-columns:1fr 1fr}.bf-photos .drop{aspect-ratio:3/2}}
+.bf-photos .drop{aspect-ratio:auto;height:100%;min-height:0;border-width:2px;border-radius:16px;background:var(--surface)}
+.bf-photos .drop img{object-fit:contain;background:var(--surface-2)}
+.drop .dz{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;font-size:15px;color:var(--muted)}
+.drop .dz svg{width:44px;height:44px;color:var(--accent)}
+.drop .dz b{font-size:19px;color:var(--fg)}
+.drop .x{width:40px;height:40px;font-size:22px;top:10px;right:10px}
+.bf-right{display:flex;flex-direction:column;min-height:0;gap:14px}
+.bf-tabs{display:flex;gap:6px;background:var(--surface-2);border-radius:14px;padding:5px}
+.bf-tabs button{flex:1;border:0;background:transparent;border-radius:10px;padding:11px 8px;font-size:15.5px;font-weight:650;color:var(--muted);line-height:1.2}
+.bf-tabs button small{display:block;font-size:12px;font-weight:500;color:var(--faint)}
+.bf-tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.bf-tabs button[aria-selected="true"] small{color:var(--muted)}
+.bf-panel{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;gap:12px 16px}
+@media (max-width:1099px){.bf-panel{grid-template-columns:repeat(2,minmax(0,1fr))}.fld.s2{grid-column:1/-1}}
+.fld.s2{grid-column:span 2}
+.bf-panel[hidden]{display:none}
+.bf-panel.map-panel{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto;align-content:stretch}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld.wide{grid-column:1/-1}
+.fld > label,.fld > .lb{font-size:15.5px;font-weight:650;color:var(--fg)}
+.fld input,.fld select,.fld textarea{width:100%;min-height:52px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 14px;font-size:17px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fld textarea{min-height:60px;resize:none;font-family:var(--f-hand);font-size:21px;line-height:1.2}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--faint)}
+.fld .req{font-weight:700}
+.big-segs{display:flex;gap:8px;flex-wrap:wrap}
+.big-segs label{flex:1;cursor:pointer;min-width:0}
+.big-segs input{position:absolute;opacity:0;pointer-events:none}
+.big-segs span{display:flex;align-items:center;justify-content:center;gap:7px;min-height:52px;padding:6px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-size:16.5px;font-weight:600;text-align:center;transition:background .2s,color .2s,border-color .2s}
+.big-segs input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.big-segs input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.bf-note{grid-column:1/-1;font-size:14.5px;color:var(--muted);margin:0}
+.map-panel .fmap{height:auto;min-height:120px}
+.sheet.xl .sh-f{padding-block:14px}
+.sheet.xl .sh-f .btn{min-height:56px;font-size:17px;padding:12px 26px;border-radius:14px}
+.sheet.xl .sh-f .btn#save{min-width:260px}
+.sheet.xl .sh-h .btn.link{font-size:17px}
+html.t-xl .fld input,html.t-xl .fld select{font-size:19px;min-height:58px}html.t-xl .fld > label,html.t-xl .fld > .lb{font-size:17px}html.t-xl .big-segs span{font-size:18px;min-height:58px}
+html.t-xl .bf-panel{gap:10px 16px}
+
 /* ---------- tab bar, toast ---------- */
 .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line);padding:6px max(12px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));justify-content:space-around;align-items:center}
 @media (max-width:819px){.tabbar{display:flex}.page{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}}
@@ -820,6 +872,7 @@ I.zoomOut = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor
 I.rotate = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>';
 I.flipc = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>';
 I.expand = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+I.camera = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 I.target = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
 /* Logo: a perforated stamp showing Ondres — Atlantic surf, the dune and a Landes maritime pine at sunset. */
 const LOGO = `<span class="logo" aria-hidden="true"><svg viewBox="0 0 28 34">
@@ -1701,7 +1754,7 @@ function coinSheetHTML(x){
     <div style="display:flex;gap:2px;justify-self:end"><button class="iconbtn" data-cprev ${i <= 0 ? 'disabled' : ''} aria-label="Pièce précédente">${I.left}</button><button class="iconbtn" data-cnext ${i < 0 || i >= list.length - 1 ? 'disabled' : ''} aria-label="Pièce suivante">${I.right}</button></div></div>
   <div class="sh-b">
     <div class="cflip" role="button" tabindex="0" aria-label="Retourner la pièce"><div class="cflip-in"><div class="cface">${coinFace(x, true)}</div><div class="cface back">${COMMON_SVG}</div></div></div>
-    <p class="flip-hint">Touchez la pièce pour voir la face commune</p>
+    <div class="d-tools"><button class="btn gray" data-cturn>${I.flipc}<span>Voir l'autre face</span></button></div>
     <div class="c-head"><h2>${esc(x.ti)}</h2><p>${pFlag(x.c)} ${esc(PAYS[x.c][0])} · ${x.t === 'N' ? esc(x.d) : x.y} · <span class="tpill ${x.t}">${TYPE_LBL[x.t]}</span></p></div>
     <button class="have-btn${h ? ' on' : ''}" data-have>${I.check}<span>${h ? 'Dans ma collection' : 'Ajouter à ma collection'}</span></button>
     <div data-own>${ownHTML(h)}</div>
@@ -1724,7 +1777,8 @@ function wireCoinSheet(){
   const nav = d => { const list = coinsVisible(), i = list.findIndex(c => c.id === x.id), n = list[i + d]; if (n) { openCoin.id = n.id; sheet.innerHTML = coinSheetHTML(n); wireCoinSheet(); } };
   $('[data-cprev]', sheet).onclick = () => nav(-1); $('[data-cnext]', sheet).onclick = () => nav(1);
   sheet.onkeydown = e => { if (e.key === 'ArrowRight') nav(1); else if (e.key === 'ArrowLeft') nav(-1); };
-  const fl = $('.cflip', sheet); fl.onclick = () => fl.classList.toggle('turned'); fl.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fl.classList.toggle('turned'); } };
+  const fl = $('.cflip', sheet), turn = () => { fl.classList.toggle('turned'); $('[data-cturn] span', sheet).textContent = fl.classList.contains('turned') ? 'Voir la face nationale' : 'Voir l\'autre face'; };
+  fl.onclick = turn; fl.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); turn(); } }; $('[data-cturn]', sheet).onclick = turn;
   $('[data-have]', sheet).onclick = () => { const t = $(`.ctile[data-cid="${x.id}"]`); toggleHave(x.id, t); };
   wireOwn();
 }
@@ -1846,6 +1900,7 @@ function openSheet(html, kind=''){
   if (!sheetOpen) lastFocus = document.activeElement;
   sheetKind = kind;
   sheet.innerHTML = html; sheet.hidden = false; scrim.hidden = false;
+  sheet.classList.toggle('xl', kind === 'form');
   document.documentElement.style.overflow = 'hidden';
   requestAnimationFrame(() => requestAnimationFrame(() => { sheet.classList.add('on'); scrim.classList.add('on'); }));
   sheetOpen = true;
@@ -2030,6 +2085,7 @@ addEventListener('keydown', e => {
 const canPhoto = () => S.mode === 'local' || !!S.assets;
 const KEEP = ['pays','region','departement','theme','type','editeur','couleur','provenance','orientation','etat'];
 let pending = {};
+const dzHTML = k => `<div class="dz">${I.camera}<b>${k === 'recto' ? 'Photo du devant' : 'Photo du dos'}</b>Cliquez ici pour choisir une photo<br>ou faites-la glisser</div>`;
 function openForm(card, carry){
   const isNew = !card;
   const c = card ? { ...card } : { id:uid(), voyagee:false, type:'CPA', couleur:'Noir & blanc', etat:'Bon', pays:'France', region:'Landes', orientation:'paysage', ...(carry||{}) };
@@ -2038,51 +2094,56 @@ function openForm(card, carry){
   const dl = (id, vals) => `<datalist id="${id}">${[...new Set(vals.filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b),'fr')).map(v => `<option value="${esc(v)}">`).join('')}</datalist>`;
   const opt = (arr, v) => arr.map(x => `<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
   const segs = (name, arr, v) => `<div class="segs" role="radiogroup">${arr.map(x => `<label><input type="radio" name="${name}" value="${esc(x)}" ${x===v?'checked':''}><span>${esc(x)}</span></label>`).join('')}</div>`;
-  const drop = (k, label) => `<div class="drop" id="drop-${k}">${c[k] ? `<img src="${esc(srcOf(c[k]))}" alt=""><button type="button" class="x" data-clear="${k}" aria-label="Retirer la photo">×</button>` : `<div><b>${label}</b>Touchez ou déposez</div>`}<input type="file" id="f-${k}" accept="image/*" aria-label="Photo ${label}"></div>`;
+  const drop = (k, label) => `<div class="drop" id="drop-${k}">${c[k] ? `<img src="${esc(srcOf(c[k]))}" alt=""><button type="button" class="x" data-clear="${k}" aria-label="Retirer la photo">×</button>` : dzHTML(k)}<input type="file" id="f-${k}" accept="image/*" aria-label="${label}"></div>`;
   const hasDetails = !isNew && ['region','prixAchat','valeur','provenance','notes','theme'].some(k => c[k]);
-  openSheet(`<div class="sh-h"><button class="btn link" data-cancel style="justify-self:start">Annuler</button><h2 id="sheet-title">${isNew ? 'Nouvelle carte' : 'Modifier'}</h2><span></span></div>
-  <div class="sh-b"><form id="card-form" novalidate>
-    ${carry ? `<div class="banner" style="margin-bottom:16px"><p>Même lot : département, type, éditeur et thème repris de la carte précédente.</p></div>` : ''}
-    ${canPhoto() ? `<div class="fg"><div class="photos${isPt(c)?' pt':''}" id="photos">${drop('recto','Recto')}${drop('verso','Verso')}</div><p class="hint">Le sens de la carte se règle tout seul d'après la photo du recto.</p></div>` : ''}
-    <div class="fg"><p class="fg-t">La carte</p><div class="group">
-      <div class="row"><label for="f-ville">Commune <span class="req">*</span></label><input id="f-ville" list="dl-ville" data-autofocus value="${esc(c.ville)}" placeholder="Ondres" autocomplete="off"></div>
-      <div class="row"><label for="f-dep">Département</label><input id="f-dep" list="dl-dep" value="${esc(c.departement || '')}" placeholder="Landes (40)" autocomplete="off"></div>
-      <div class="row"><label for="f-titre">Légende</label><input id="f-titre" value="${esc(c.titre)}" placeholder="La Plage et les Dunes" autocomplete="off"></div>
-      <div class="row"><label for="f-editeur">Éditeur</label><input id="f-editeur" list="dl-editeur" value="${esc(c.editeur)}" placeholder="LL., ND Phot., Barrère…" autocomplete="off"></div>
-      <div class="row"><label for="f-numero">N° de l'éditeur</label><input id="f-numero" value="${esc(c.numero || '')}" placeholder="125" autocomplete="off"></div>
-      <div class="row"><label for="f-annee">Année</label><input id="f-annee" type="number" inputmode="numeric" min="1869" max="2100" value="${esc(c.annee)}" placeholder="1910"></div>
-      <div class="row"><label>Type</label>${segs('type', TYPES.map(t => t[0]), c.type)}</div>
-      <div class="row"><label for="f-voyagee">Circulée</label><input type="checkbox" class="switch" id="f-voyagee" ${c.voyagee?'checked':''}></div>
-      <div class="row" id="row-date" ${c.voyagee?'':'hidden'}><label for="f-date">Date du cachet</label><input id="f-date" type="date" value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(c.dateEnvoi||'')?c.dateEnvoi:'')}"></div>
-    </div><p class="hint">Seule la commune est obligatoire. CPA : avant 1940 · CPSM : 1940–1970 · CPM : après 1970. Circulée : la carte a été postée (timbre et cachet).</p></div>
-    <div class="fg"><p class="fg-t">Prise de vue</p><div class="group">
-      <div class="row"><label for="f-lieu">Lieu ou adresse</label><input id="f-lieu" value="${esc(c.lieu)}" placeholder="Plage d'Ondres, église…" autocomplete="off"></div>
-      <div class="row col"><div class="fmap" id="fmap"></div>
-        <div class="fmap-bar"><span id="geo-state"></span>${window.claude?.use ? `<button type="button" class="btn soft" id="geo-find">${I.target}Localiser l'adresse</button>` : ''}<button type="button" class="btn gray" id="geo-clear">Retirer le point</button></div></div>
-    </div><p class="hint">Touchez la carte pour placer l'endroit exact d'où la photo a été prise. Sans point, la carte est placée au centre de sa commune.</p></div>
-    <details class="more" ${hasDetails?'open':''}><summary>${I.chev}Plus de détails</summary>
-      <div class="fg"><p class="fg-t">Description</p><div class="group">
-        <div class="row"><label>Sens</label><div class="segs" role="radiogroup" aria-label="Sens de la carte">
-          <label><input type="radio" name="orient" value="paysage" ${c.orientation==='paysage'?'checked':''}><span><i class="ori"></i>Paysage</span></label>
-          <label><input type="radio" name="orient" value="portrait" ${c.orientation==='portrait'?'checked':''}><span><i class="ori v"></i>Portrait</span></label></div></div>
-        <div class="row"><label for="f-pays">Pays</label><input id="f-pays" list="dl-pays" value="${esc(c.pays)}" placeholder="France" autocomplete="off"></div>
-        <div class="row"><label for="f-region">Région</label><input id="f-region" list="dl-region" value="${esc(c.region)}" placeholder="Pyrénées-Atlantiques" autocomplete="off"></div>
-        <div class="row"><label for="f-theme">Thème</label><select id="f-theme"><option value="">Choisir</option>${opt(THEMES, c.theme)}</select></div>
-        <div class="row"><label for="f-couleur">Impression</label><select id="f-couleur">${opt(COULEURS, c.couleur)}</select></div>
-      </div></div>
-      <div class="fg"><p class="fg-t">État &amp; valeur</p><div class="group">
-        <div class="row"><label>État</label>${segs('etat', ETATS, c.etat)}</div>
-        <div class="row"><label for="f-achat">Prix d'achat (€)</label><input id="f-achat" type="number" inputmode="decimal" min="0" step="0.5" value="${esc(c.prixAchat)}" placeholder="0"></div>
-        <div class="row"><label for="f-valeur">Valeur estimée (€)</label><input id="f-valeur" type="number" inputmode="decimal" min="0" step="0.5" value="${esc(c.valeur)}" placeholder="0"></div>
-        <div class="row"><label for="f-prov">Acquise</label><input id="f-prov" list="dl-prov" value="${esc(c.provenance)}" placeholder="Brocante, héritage…" autocomplete="off"></div>
-      </div></div>
-      <div class="fg" style="margin-bottom:0"><p class="fg-t">Correspondance</p><div class="group"><div class="row col"><label for="f-notes">Message au dos, notes</label><textarea id="f-notes" placeholder="Bons baisers de Biarritz…">${esc(c.notes)}</textarea></div></div></div>
-    </details>
+  const bseg = (name, arr, v) => `<div class="big-segs" role="radiogroup">${arr.map(([val, l]) => `<label><input type="radio" name="${name}" value="${esc(val)}" ${val===v?'checked':''}><span>${l}</span></label>`).join('')}</div>`;
+  openSheet(`<div class="sh-h"><button class="btn link" data-cancel style="justify-self:start">Annuler</button><h2 id="sheet-title">${isNew ? 'Ajouter une carte' : 'Modifier la carte'}</h2><span></span></div>
+  <div class="sh-b"><form id="card-form" class="bf" novalidate>
+    <div class="bf-photos" id="photos">${canPhoto() ? drop('recto','Photo du devant') + drop('verso','Photo du dos') : `<div class="drop"><div class="dz">Photos indisponibles ici</div></div>`}</div>
+    <div class="bf-right">
+      ${carry ? `<p class="bf-note" style="background:var(--accent-soft);color:var(--fg);padding:9px 12px;border-radius:10px">Même lot : département, type et éditeur repris de la carte précédente.</p>` : ''}
+      <div class="bf-tabs" role="tablist">
+        <button type="button" role="tab" data-bft="1" aria-selected="true">La carte<small>l'essentiel</small></button>
+        <button type="button" role="tab" data-bft="2" aria-selected="false">Plus d'infos<small>facultatif</small></button>
+        <button type="button" role="tab" data-bft="3" aria-selected="false">Sur la carte<small>facultatif</small></button>
+      </div>
+      <div class="bf-panel" data-bfp="1">
+        <div class="fld"><label for="f-ville">Commune <span class="req">*</span></label><input id="f-ville" list="dl-ville" data-autofocus value="${esc(c.ville)}" placeholder="Ondres" autocomplete="off"></div>
+        <div class="fld"><label for="f-dep">Département</label><input id="f-dep" list="dl-dep" value="${esc(c.departement || '')}" placeholder="Landes (40)" autocomplete="off"></div>
+        <div class="fld"><label for="f-annee">Année</label><input id="f-annee" type="number" inputmode="numeric" min="1869" max="2100" value="${esc(c.annee)}" placeholder="1910"></div>
+        <div class="fld s2"><label for="f-titre">Légende écrite sur la carte</label><input id="f-titre" value="${esc(c.titre)}" placeholder="La Plage et les Dunes" autocomplete="off"></div>
+        <div class="fld"><span class="lb">Type</span>${bseg('type', [['CPA','CPA'],['CPSM','CPSM'],['CPM','CPM']], c.type)}</div>
+        <div class="fld"><label for="f-editeur">Éditeur</label><input id="f-editeur" list="dl-editeur" value="${esc(c.editeur)}" placeholder="LL., Barrère…" autocomplete="off"></div>
+        <div class="fld"><label for="f-numero">N° de l'éditeur</label><input id="f-numero" value="${esc(c.numero || '')}" placeholder="125" autocomplete="off"></div>
+        <div class="fld"><span class="lb">Postée (circulée) ?</span>${bseg('circ', [['oui','Oui'],['non','Non']], c.voyagee ? 'oui' : 'non')}<input type="checkbox" id="f-voyagee" hidden ${c.voyagee?'checked':''}></div>
+        <div class="fld s2"><span class="lb">État</span>${bseg('etat', ETATS.map(e => [e, e]), c.etat)}</div>
+        <div class="fld" id="row-date" ${c.voyagee?'':'hidden'}><label for="f-date">Date du cachet</label><input id="f-date" type="date" value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(c.dateEnvoi||'')?c.dateEnvoi:'')}"></div>
+        <p class="bf-note">Seule la commune est obligatoire. CPA : avant 1940 · CPSM : 1940 à 1970 · CPM : après 1970.</p>
+      </div>
+      <div class="bf-panel" data-bfp="2" hidden>
+        <div class="fld"><label for="f-pays">Pays</label><input id="f-pays" list="dl-pays" value="${esc(c.pays)}" placeholder="France" autocomplete="off"></div>
+        <div class="fld"><label for="f-region">Région</label><input id="f-region" list="dl-region" value="${esc(c.region)}" placeholder="Landes" autocomplete="off"></div>
+        <div class="fld"><label for="f-theme">Thème</label><select id="f-theme"><option value="">Choisir…</option>${opt(THEMES, c.theme)}</select></div>
+        <div class="fld"><label for="f-couleur">Impression</label><select id="f-couleur">${opt(COULEURS, c.couleur)}</select></div>
+        <div class="fld"><label for="f-achat">Prix payé (€)</label><input id="f-achat" type="number" inputmode="decimal" min="0" step="0.5" value="${esc(c.prixAchat)}" placeholder="0"></div>
+        <div class="fld"><label for="f-valeur">Valeur estimée (€)</label><input id="f-valeur" type="number" inputmode="decimal" min="0" step="0.5" value="${esc(c.valeur)}" placeholder="0"></div>
+        <div class="fld s2"><label for="f-prov">Où l'avez-vous eue ?</label><input id="f-prov" list="dl-prov" value="${esc(c.provenance)}" placeholder="Brocante, héritage…" autocomplete="off"></div>
+        <div class="fld"><span class="lb">Sens</span>${bseg('orient', [['paysage','<i class="ori"></i>Couchée'],['portrait','<i class="ori v"></i>Debout']], c.orientation)}</div>
+        <div class="fld wide"><label for="f-notes">Message écrit au dos</label><textarea id="f-notes" rows="2" placeholder="Bons baisers d'Ondres…">${esc(c.notes)}</textarea></div>
+      </div>
+      <div class="bf-panel map-panel" data-bfp="3" hidden>
+        <div class="fld"><label for="f-lieu">Lieu ou adresse de la photo</label><input id="f-lieu" value="${esc(c.lieu)}" placeholder="Plage d'Ondres, église…" autocomplete="off"></div>
+        <div class="fmap" id="fmap"></div>
+        <div class="fmap-bar" style="padding:0"><span id="geo-state"></span>${window.claude?.use ? `<button type="button" class="btn soft" id="geo-find">${I.target}Localiser l'adresse</button>` : ''}<button type="button" class="btn gray" id="geo-clear">Retirer le point</button></div>
+      </div>
+    </div>
     <datalist id="dl-ville">${[...new Set([...LOCAL, ...S.cards.map(x => x.ville).filter(Boolean), ...(GEO ? GEO.c.map(x => x[1]) : [])])].map(v => `<option value="${esc(v)}">`).join('')}</datalist>${dl('dl-pays', [...COUNTRIES, ...S.cards.map(x => x.pays)])}${dl('dl-dep', ['Landes (40)', 'Pyrénées-Atlantiques (64)', 'Gironde (33)', 'Gers (32)', 'Hautes-Pyrénées (65)', 'Lot-et-Garonne (47)', ...S.cards.map(x => x.departement)])}${dl('dl-region', S.cards.map(x => x.region))}${dl('dl-editeur', S.cards.map(x => x.editeur))}${dl('dl-prov', S.cards.map(x => x.provenance))}
   </form></div>
-  <div class="sh-f"><p class="err" id="form-err" hidden style="flex:1 1 100%;margin:0 0 4px"></p>
-    ${isNew ? `<button class="btn gray" id="save-next" type="button">Enregistrer et ajouter une autre</button>` : ''}
-    <button class="btn" id="save" type="button">${isNew ? 'Enregistrer' : 'Enregistrer les modifications'}</button></div>`, 'form');
+  <div class="sh-f"><p class="err" id="form-err" hidden style="flex:1 1 100%;margin:0 0 4px;font-size:16px"></p>
+    ${isNew ? `<button class="btn gray" id="save-next" type="button">Enregistrer et en ajouter une autre</button>` : ''}
+    <button class="btn" id="save" type="button">${I.check}${isNew ? 'Enregistrer la carte' : 'Enregistrer'}</button></div>`, 'form');
+  $$('[data-bft]', sheet).forEach(t => t.onclick = () => { $$('[data-bft]', sheet).forEach(x => x.setAttribute('aria-selected', x === t)); $$('[data-bfp]', sheet).forEach(pn => pn.hidden = pn.dataset.bfp !== t.dataset.bft); });
+  $$('input[name=circ]', sheet).forEach(r => r.onchange = () => { const sw = $('#f-voyagee'); sw.checked = r.value === 'oui' && r.checked; sw.onchange?.(); });
 
   $('[data-cancel]', sheet).onclick = () => { closeSheet(); if (!isNew && !wideMQ.matches) setTimeout(() => openDetail(c.id), 430); };
   const sw = $('#f-voyagee'); sw.onchange = () => { $('#row-date').hidden = !sw.checked; };
@@ -2175,7 +2236,7 @@ function wireDrop(k){
   box.ondragleave = () => box.classList.remove('over');
   box.ondrop = e => { e.preventDefault(); box.classList.remove('over'); const f = e.dataTransfer.files?.[0]; if (f && f.type.startsWith('image/')) show(f); };
   const clr = $('[data-clear]', box);
-  if (clr) clr.onclick = e => { e.preventDefault(); e.stopPropagation(); pending[k] = null; box.innerHTML = `<div><b>${k==='recto'?'Recto':'Verso'}</b>Touchez ou déposez</div><input type="file" accept="image/*" aria-label="Photo">`; wireDrop(k); };
+  if (clr) clr.onclick = e => { e.preventDefault(); e.stopPropagation(); pending[k] = null; box.innerHTML = `${dzHTML(k)}<input type="file" accept="image/*" aria-label="Photo">`; wireDrop(k); };
 }
 async function shrink(file, max, q){
   let bmp; try { bmp = await createImageBitmap(file); } catch { return file; }
