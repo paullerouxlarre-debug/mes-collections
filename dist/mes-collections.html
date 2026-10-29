@@ -1544,6 +1544,14 @@ function coinFace(x, big){
   if (x.im && !imgBroken.has(x.id)) return `<span class="coin coin-real"><img src="${esc(ECB + x.im)}" alt="" loading="${big ? 'eager' : 'lazy'}" decoding="async" referrerpolicy="no-referrer" data-cid="${x.id}" onerror="coinImgFail(this)"></span>`;
   return coinSVG(x);
 }
+/* face commune réelle : ancienne carte de l'UE (avant 2007, 2008 pour IT/SM/VA/AT/PT) ou carte de l'Europe */
+function commonFace(x){
+  let y = x.y;
+  if (x.t === 'N') { const m = String(x.d).match(/(\d{4})\D+(\d{4})/); y = /depuis/.test(x.d) ? 9999 : m ? Number(m[2]) : x.y; }
+  const late = ['IT','SM','VA','AT','PT'].includes(x.c) ? 2008 : 2007;
+  const file = y >= late ? 'newcommon_2euro_800.jpg' : 'common_2euro_800.jpg';
+  return `<span class="coin coin-real"><img src="${ECB}common/shared/img/${file}" alt="Face commune de la pièce de 2 €" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.coin-real').outerHTML = COMMON_SVG"></span>`;
+}
 window.coinImgFail = img => { const id = img.dataset.cid; imgBroken.add(id); const x = COIN.get(id); const host = img.closest('.coin-real'); if (host && x) host.outerHTML = coinSVG(x); };
 function coinSVG(x){
   let h = coinCache.get(x.id); if (h) return h;
@@ -1559,7 +1567,7 @@ function coinSVG(x){
   </svg>`;
   coinCache.set(x.id, h); return h;
 }
-const COMMON_SVG = `<svg class="coin" viewBox="0 0 200 200" aria-hidden="true">
+window.COMMON_SVG = `<svg class="coin" viewBox="0 0 200 200" aria-hidden="true">
   <circle cx="100" cy="100" r="99" fill="url(#cg-ring)"/><circle cx="100" cy="100" r="99" fill="none" stroke="#7E848D" stroke-opacity=".5"/>
   <circle cx="100" cy="100" r="71" fill="url(#cg-core)"/>
   <g clip-path="url(#cg-clip)"><g transform="translate(72 34) scale(.82)"><path d="${EUROPE}" fill="#C49A35" stroke="#6E5212" stroke-width=".9" stroke-opacity=".6"/></g></g>
@@ -1738,7 +1746,7 @@ function coinSheetHTML(x){
   return `<div class="sh-h"><button class="btn link" data-close style="justify-self:start">Fermer</button><h2 id="sheet-title">Pièce de 2 €</h2>
     <div style="display:flex;gap:2px;justify-self:end"><button class="iconbtn" data-cprev ${i <= 0 ? 'disabled' : ''} aria-label="Pièce précédente">${I.left}</button><button class="iconbtn" data-cnext ${i < 0 || i >= list.length - 1 ? 'disabled' : ''} aria-label="Pièce suivante">${I.right}</button></div></div>
   <div class="sh-b">
-    <div class="cflip" role="button" tabindex="0" aria-label="Retourner la pièce"><div class="cflip-in"><div class="cface">${coinFace(x, true)}</div><div class="cface back">${COMMON_SVG}</div></div></div>
+    <div class="cflip" role="button" tabindex="0" aria-label="Retourner la pièce"><div class="cflip-in"><div class="cface">${coinFace(x, true)}</div><div class="cface back">${commonFace(x)}</div></div></div>
     <div class="d-tools"><button class="btn gray" data-cturn>${I.flipc}<span>Voir l'autre face</span></button></div>
     <div class="c-head"><h2>${esc(x.ti)}</h2><p>${pFlag(x.c)} ${esc(PAYS[x.c][0])} · ${x.t === 'N' ? esc(x.d) : x.y} · <span class="tpill ${x.t}">${TYPE_LBL[x.t]}</span></p></div>
     <button class="have-btn${h ? ' on' : ''}" data-have>${I.check}<span>${h ? 'Dans ma collection' : 'Ajouter à ma collection'}</span></button>
