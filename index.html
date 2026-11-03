@@ -2216,8 +2216,8 @@ function openForm(card, carry){
       <div class="bf-panel" data-bfp="2" hidden>
         <div class="fld"><label for="f-pays">Pays</label><input id="f-pays" list="dl-pays" value="${esc(c.pays)}" placeholder="France" autocomplete="off"></div>
         <div class="fld"><label for="f-region">Région</label><input id="f-region" list="dl-region" value="${esc(c.region)}" placeholder="Landes" autocomplete="off"></div>
-        <div class="fld"><label for="f-theme">Thème</label><select id="f-theme"><option value="">Choisir…</option>${opt(THEMES, c.theme)}</select></div>
-        <div class="fld"><label for="f-couleur">Impression</label><select id="f-couleur">${opt(COULEURS, c.couleur)}</select></div>
+        <div class="fld"><label for="f-theme">Thème</label><select id="f-theme"><option value="">Choisir…</option>${opt(c.theme && !THEMES.includes(c.theme) ? [...THEMES, c.theme] : THEMES, c.theme)}</select></div>
+        <div class="fld"><label for="f-couleur">Impression</label><select id="f-couleur">${opt(c.couleur && !COULEURS.includes(c.couleur) ? [...COULEURS, c.couleur] : COULEURS, c.couleur)}</select></div>
         <div class="fld"><label for="f-achat">Prix payé (€)</label><input id="f-achat" type="number" inputmode="decimal" min="0" step="0.5" value="${esc(c.prixAchat)}" placeholder="0"></div>
         <div class="fld"><label for="f-valeur">Valeur estimée (€)</label><input id="f-valeur" type="number" inputmode="decimal" min="0" step="0.5" value="${esc(c.valeur)}" placeholder="0"></div>
         <div class="fld s2"><label for="f-prov">Où l'avez-vous eue ?</label><input id="f-prov" list="dl-prov" value="${esc(c.provenance)}" placeholder="Brocante, héritage…" autocomplete="off"></div>
@@ -2331,12 +2331,27 @@ function wireDrop(k){
   const clr = $('[data-clear]', box);
   if (clr) clr.onclick = e => { e.preventDefault(); e.stopPropagation(); pending[k] = null; box.innerHTML = `${dzHTML(k)}<input type="file" accept="image/*" aria-label="Photo">`; wireDrop(k); };
 }
+/* Réduit une photo sans moiré : les cartes imprimées ont une trame de petits points qui,
+   réduite d'un seul coup, devient une grille visible. On adoucit d'abord la trame
+   (léger flou proportionnel à la réduction), puis on réduit par moitiés successives. */
 async function shrink(file, max, q){
   let bmp; try { bmp = await createImageBitmap(file); } catch { return file; }
   const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
-  const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width*s); cv.height = Math.round(bmp.height*s);
-  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
-  return await new Promise(r => cv.toBlob(b => r(b || file), 'image/jpeg', q));
+  const W = Math.round(bmp.width*s), H = Math.round(bmp.height*s);
+  const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; return [c, x]; };
+  let [cur, ctx] = canvas(bmp.width, bmp.height);
+  const r = s < .9 ? Math.min(8, .8 / s) : 0;
+  if (r && 'filter' in ctx) { ctx.filter = `blur(${r.toFixed(2)}px)`; ctx.drawImage(bmp, 0, 0); ctx.filter = 'none'; }
+  else ctx.drawImage(bmp, 0, 0);
+  bmp.close?.();
+  while (cur.width / 2 >= W * 1.2) {
+    const [n, nx] = canvas(Math.round(cur.width / 2), Math.round(cur.height / 2));
+    nx.drawImage(cur, 0, 0, n.width, n.height); cur = n;
+  }
+  const [out, ox] = canvas(W, H);
+  ox.fillStyle = '#fff'; ox.fillRect(0, 0, W, H);
+  ox.drawImage(cur, 0, 0, W, H);
+  return await new Promise(res => out.toBlob(b => res(b || file), 'image/jpeg', q));
 }
 async function storePhoto(file){
   if (S.mode === 'db' && S.assets) { const blob = await shrink(file, 2000, .88); return (await S.assets.upload(blob, { type: blob.type || 'image/jpeg' })).id; }
