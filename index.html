@@ -658,7 +658,22 @@ details.more[open] summary svg{transform:rotate(90deg)}
 .bk-prog{height:6px;border-radius:9px;background:var(--surface-2);overflow:hidden;margin-top:10px}
 .bk-prog i{display:block;height:100%;width:0;background:var(--accent);border-radius:9px;transition:width .3s}
 .bk-info{font-size:13px;margin:10px 0 0;color:var(--fg)}
+.home-legal{max-width:680px;margin:10px auto 0;text-align:center;font-size:12px;line-height:1.45;color:var(--faint);font-style:italic;letter-spacing:.01em}
 .home-actions{display:flex;justify-content:center;gap:10px;margin-top:28px;animation:fadeUp .8s var(--spring) .15s both}
+/* accueil sur ordinateur : tout tient dans la hauteur de l'écran, sans défilement */
+@media (min-width:820px){
+  .home-pg{padding-block:clamp(14px,3vh,48px) clamp(12px,2.5vh,32px)}
+  .home-hd{gap:4px}.home-hd .logo{width:clamp(30px,5vh,52px);height:auto;aspect-ratio:52/62}
+  @media (max-height:860px){.home-hd .logo{display:none}}
+  .home-hd h1{font-size:clamp(30px,min(5.2vw,6vh),64px)}
+  .choices{margin-top:clamp(14px,3vh,44px)}
+  .stage{height:clamp(100px,calc(100vh - 625px),320px)}
+  .stage .fan{width:min(300px,60%,calc((100vh - 610px)*1.15))}
+  .ch-body{padding-block:clamp(12px,2.2vh,26px)!important}
+  .ch-body p{margin-block:4px 8px}
+  .home-actions{margin-top:clamp(12px,2.4vh,28px)}
+  .home-ft{display:none}
+}
 
 
 /* ---------- grand format (visionneuse) ---------- */
@@ -1252,6 +1267,7 @@ function renderHome(){
     </div>
     <div class="home-actions"><button class="btn gray" data-backup>${I.save}Sauvegarder ou restaurer mes données</button></div>
     <p class="home-ft">Astuce : les onglets en haut de l'écran permettent de passer d'une collection à l'autre à tout moment.</p>
+    <p class="home-legal">Mentions légales : logiciel conçu sur mesure et adapté à l'usage professionnel de Papo, collectionneur en chef à Ondres (40). Toute pièce manquante est provisoire. Reproduction interdite sans l'accord du Président.</p>
   </div>`;
   $$('[data-open]', main).forEach(b => b.onclick = () => { location.hash = b.dataset.open; });
   $('[data-backup]', main).onclick = openBackup;
