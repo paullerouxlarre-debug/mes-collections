@@ -531,6 +531,12 @@ details.more[open] summary svg{transform:rotate(90deg)}
 .have-btn.on{background:var(--ok);color:#fff}
 .c-text{font-size:15px;line-height:1.55;margin:14px 2px 0;text-wrap:pretty}
 .c-own{margin-top:14px}
+.y-band{display:grid;grid-template-columns:auto auto minmax(120px,1fr) auto auto;align-items:center;gap:10px 22px;background:var(--surface);border-radius:16px;padding:14px 22px;box-shadow:0 0 0 .5px var(--line);margin:-6px 0 18px;animation:fadeUp .5s var(--spring) both}
+.y-t b{display:block;font:700 16px var(--f-title)}.y-t span{font-size:12.5px;color:var(--muted)}
+.y-v b{font:700 26px var(--f-title);letter-spacing:-.02em;font-variant-numeric:tabular-nums}.y-v span{color:var(--muted);font-weight:600;font-size:14px}
+.y-bar{height:10px;border-radius:9px;background:var(--surface-2);overflow:hidden}.y-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--gold),var(--ok));transition:width .8s var(--spring)}
+.y-n{font-size:13.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:1100px){.y-band{grid-template-columns:1fr auto}.y-bar{grid-column:1/-1}}
 @media (min-width:820px){
   .sheet:has(.cs-grid){width:min(1040px,calc(100% - 32px));max-height:calc(100% - 24px)}
   .cs-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:26px;align-items:start}
@@ -1614,6 +1620,29 @@ function coinYears(x){
   const b = /depuis/.test(x.d) ? Math.max(a, new Date().getFullYear()) : m ? Number(m[2]) : a;
   const out = []; for (let y = a; y <= b; y++) out.push(y); return out;
 }
+/* Objectif 2 : toutes les années des faces nationales (distinct de l'objectif « une pièce de chaque ») */
+function yearStats(){
+  let got = 0, all = 0, full = 0, faces = 0; const byC = new Map();
+  for (const x of COINS) {
+    if (x.t !== 'N') continue;
+    const ys = coinYears(x); if (!ys.length) continue;
+    const h = PC.have.get(x.id);
+    const ans = new Set(ys.length === 1 ? (h ? ys : []) : (h?.ans || []).filter(y => ys.includes(y)));
+    got += ans.size; all += ys.length; faces++; if (ans.size === ys.length) full++;
+    const c = byC.get(x.c) || [0, 0]; c[0] += ans.size; c[1] += ys.length; byC.set(x.c, c);
+  }
+  return { got, all, full, faces, byC };
+}
+/* nombre de pièces réellement possédées : une face nationale compte une pièce par année cochée */
+const coinsOwned = () => [...PC.have.entries()].reduce((n, [id, h]) => n + Math.max(h.qty || 1, COIN.get(id)?.t === 'N' ? (h.ans?.length || 0) : 0), 0);
+function yearsBandHTML(){
+  const y = yearStats(), pct = y.all ? y.got / y.all : 0;
+  return `<div class="y-band" id="y-band"><div class="y-t"><b>Objectif années</b><span>Toutes les années de frappe des ${y.faces} faces nationales</span></div>
+    <div class="y-v"><b id="y-got">${y.got}</b><span> / ${y.all} années</span></div>
+    <div class="y-bar"><i id="y-bar" style="width:${(pct*100).toFixed(1)}%"></i></div>
+    <div class="y-n" id="y-n">${Math.round(pct*100)} % · ${plural(y.full, 'face complète', 'faces complètes')}</div>
+    <button class="btn soft" id="y-go">Voir les faces nationales</button></div>`;
+}
 function coinFace(x, big){
   if (x.im && !imgBroken.has(x.id)) return `<span class="coin coin-real"><img src="${esc(coinSrc(x))}" alt="" loading="${big ? 'eager' : 'lazy'}" decoding="async" referrerpolicy="no-referrer" data-cid="${x.id}" onerror="coinImgFail(this)"></span>`;
   return coinSVG(x);
@@ -1748,8 +1777,8 @@ function piecesMain(main){
     <div class="ring"><svg viewBox="0 0 132 132"><circle class="bg" cx="66" cy="66" r="${R}"/><circle class="fg" id="p-ring" cx="66" cy="66" r="${R}" stroke-dasharray="${L.toFixed(1)}" stroke-dashoffset="${L.toFixed(1)}" data-off="${(L*(1-pct)).toFixed(1)}"/></svg>
       <div class="ring-c"><div><b id="p-pct">${Math.round(pct*100)} %</b><span id="p-count">${have} / ${all}</span></div></div></div>
     <div class="p-stats">${stat('Faces nationales', byT('N'))}${stat('Commémoratives', byT('C'))}${stat('Émissions communes', byT('U'))}
-      <div class="p-stat"><div class="l">Valeur faciale</div><div class="v" id="p-face">${eur.format((have + dbl) * 2)}</div><div class="l" style="margin-top:4px">${plural(dbl,'doublon')}</div></div></div>
-  </div>`;
+      <div class="p-stat"><div class="l">Valeur faciale</div><div class="v" id="p-face">${eur.format(coinsOwned() * 2)}</div><div class="l" style="margin-top:4px">${plural(dbl,'doublon')}</div></div></div>
+  </div>${yearsBandHTML()}`;
   if (!list.length) html += `<div class="empty"><h2>Aucune pièce</h2><p>Rien ne correspond à ce filtre.</p><button class="btn soft" id="p-reset">Voir toutes les pièces</button></div>`;
   const groups = new Map();
   const gk = x => S.pf.group === 'pays' ? x.c : x.y;
@@ -1761,11 +1790,13 @@ function piecesMain(main){
   for (const [k, arr] of groups) {
     const h = arr.filter(x => PC.have.has(x.id)).length;
     const title = S.pf.group === 'pays' ? `<span class="fl">${pFlag(k)}</span><h2>${esc(PAYS[k][0])}</h2>` : `<h2>${k}</h2>`;
-    html += `<section class="p-sec" data-sec="${k}"><div class="p-sec-h">${title}<span class="meta" data-meta>${h} / ${arr.length}</span><span class="mini"><i style="width:${(h/arr.length*100).toFixed(1)}%"></i></span></div>
+    const yc = S.pf.group === 'pays' ? yearStats().byC.get(k) : null;
+    html += `<section class="p-sec" data-sec="${k}"><div class="p-sec-h">${title}<span class="meta" data-meta>${h} / ${arr.length}</span>${yc ? `<span class="meta" data-ymeta>· années ${yc[0]} / ${yc[1]}</span>` : ''}<span class="mini"><i style="width:${(h/arr.length*100).toFixed(1)}%"></i></span></div>
       <div class="cgrid">${arr.map((x, i) => coinTile(x, gi++ < 40 ? i : 0)).join('')}</div></section>`;
   }
   main.innerHTML = `<div class="page">${html}</div>`;
   $('#p-reset')?.addEventListener('click', () => { S.pf.q = ''; setPF({ status:'all', type:'all', pays:'' }); });
+  $('#y-go')?.addEventListener('click', () => { S.pf.q = ''; setPF({ status:'all', type:'N', pays:'', group:'pays' }); try { lsSet('mcp.pgroup', 'pays'); } catch {} });
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const r = $('#p-ring'); if (r) r.style.strokeDashoffset = r.dataset.off;
     $$('.p-stat .bar i', main).forEach(i => i.style.width = i.dataset.w + '%');
@@ -1805,7 +1836,9 @@ function refreshPieces(){
     const all = COINS.length, have = COINS.filter(x => PC.have.has(x.id)).length, R = 56, L = 2*Math.PI*R;
     const dbl = [...PC.have.values()].reduce((n, h) => n + Math.max(0, (h.qty || 1) - 1), 0);
     const r = $('#p-ring'); if (r) r.style.strokeDashoffset = (L*(1 - have/all)).toFixed(1);
-    if ($('#p-pct')) { $('#p-pct').textContent = Math.round(have/all*100) + ' %'; $('#p-count').textContent = `${have} / ${all}`; $('#p-face').textContent = eur.format((have + dbl)*2); }
+    if ($('#p-pct')) { $('#p-pct').textContent = Math.round(have/all*100) + ' %'; $('#p-count').textContent = `${have} / ${all}`; $('#p-face').textContent = eur.format(coinsOwned()*2); }
+    if ($('#y-got')) { const y = yearStats(), yp = y.all ? y.got / y.all : 0; $('#y-got').textContent = y.got; $('#y-bar').style.width = (yp*100).toFixed(1) + '%'; $('#y-n').textContent = `${Math.round(yp*100)} % · ${plural(y.full, 'face complète', 'faces complètes')}`;
+      $$('.p-sec', main).forEach(sec => { const m = $('[data-ymeta]', sec), c = y.byC.get(sec.dataset.sec); if (m && c) m.textContent = `· années ${c[0]} / ${c[1]}`; }); }
     const types = ['N','C','U']; $$('.p-stat', main).slice(0, 3).forEach((el, i) => { const a = COINS.filter(x => x.t === types[i]), h = a.filter(x => PC.have.has(x.id)).length; $('.v', el).firstChild.textContent = h; $('.bar i', el).style.width = (h/a.length*100).toFixed(1) + '%'; });
     updatePSub();
     if (S.pf.status !== 'all') { clearTimeout(refreshPieces.t); refreshPieces.t = setTimeout(() => { if (!sheetOpen) renderMain(); }, 900); }
