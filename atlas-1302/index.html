@@ -289,6 +289,11 @@ body.chat-open .chat-fab{display:none}
 .chat-row{display:flex;align-items:center;gap:8px}
 .chat-row .src{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-pic{cursor:pointer;padding:5px 10px}
+
+.ai-dlg{position:fixed;inset:0;z-index:70;background:rgb(0 0 0/.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.ai-box{background:var(--sheet);color:var(--ink);border-radius:8px;padding:20px;max-width:480px;width:100%;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 50px rgb(0 0 0/.35)}
+.ai-box input{font:14px var(--mono);padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);width:100%}
+.ai-box p{margin:0}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -522,9 +527,17 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
   </main>
 </div>
 
+<div id="aiDlg" class="ai-dlg" hidden role="dialog" aria-labelledby="aiT"><div class="ai-box">
+  <h3 id="aiT">Réglages IA · clé Gemini</h3>
+  <p class="src">Sur la version GitHub de l'atlas, la discussion et l'analyse des photos passent par Gemini (Google), avec ta clé gratuite d'AI Studio. La clé reste dans le navigateur de cet appareil : elle n'est jamais envoyée sur GitHub.</p>
+  <input id="aiKey" type="password" autocomplete="off" placeholder="Colle ta clé Gemini ici" aria-label="Clé Gemini">
+  <div class="actions"><button class="btn pri" type="button" id="aiSave">Vérifier et enregistrer</button><button class="btn" type="button" id="aiForget">Effacer la clé</button><button class="btn" type="button" id="aiClose">Fermer</button></div>
+  <p class="src" id="aiMsg" aria-live="polite"></p>
+  <p class="src">Offre gratuite : Google peut conserver les questions et photos envoyées pour améliorer ses services. N'y mets pas de documents personnels (carte grise, plaque).</p>
+</div></div>
 <button id="chatFab" class="chat-fab" type="button" aria-expanded="false" aria-controls="chatPanel">💬 Parler à Claude</button>
 <section id="chatPanel" class="chat" hidden aria-label="Discussion avec Claude">
-  <header class="chat-h"><b>Atelier · discussion avec Claude</b><button type="button" class="btn" id="chatClear">Effacer</button><button type="button" class="btn" id="chatClose" aria-label="Fermer">✕</button></header>
+  <header class="chat-h"><b>Atelier · discussion avec Claude</b><button type="button" class="btn" id="chatCfg" data-ai-settings hidden>Réglages IA</button><button type="button" class="btn" id="chatClear">Effacer</button><button type="button" class="btn" id="chatClose" aria-label="Fermer">✕</button></header>
   <div id="chatLog" class="chat-log" aria-live="polite"></div>
   <p id="chatNote" class="chat-note" hidden></p>
   <form id="chatForm" class="chat-f">
@@ -567,6 +580,7 @@ let h='<div class="sec">Atelier</div>'+
   '<a class="it" href="#couples"><span class="n">Nm</span>Couples de serrage</a>'+
   '<a class="it" href="#fiche"><span class="n">i</span>Fiche technique</a>'+
   '<a class="it" href="#liste"><span class="n">+</span>Ma liste de pièces</a>'+
+  (window.claude&&window.claude.use?'':'<a class="it" href="#" data-ai-settings><span class="n">⚙</span>Réglages IA (clé Gemini)</a>')+
   '<div class="sec">Pièces par groupe</div>';
 Object.keys(D.chapters).forEach(c=>{
   h+=`<details data-ch="${c}"><summary><span class="n">${pad(c)}</span>${esc(D.chapters[c][0])}</summary><a class="it" href="#ch-${c}"><span class="n">≡</span>Sommaire du groupe</a>`;
@@ -775,10 +789,100 @@ hits.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;if(
 document.addEventListener('keydown',e=>{const g=e.target.closest&&e.target.closest('.rp');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pinTo(g.dataset.pin,'draw')}});
 document.addEventListener('click',e=>{if(!e.target.closest('.find'))hits.hidden=true;if(document.body.classList.contains('nav-open')&&!e.target.closest('aside')&&!e.target.closest('.menu'))document.body.classList.remove('nav-open')});
 
-/* ---------- mes photos : dépôt, stockage, analyse par Claude ---------- */
+/* ---------- mode local (version GitHub) : Gemini avec la clé de Paul + stockage dans le navigateur ---------- */
+const Local=(()=>{
+  const KEY='cat1302-gemini-key';
+  const MODELS=['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-flash-latest','gemini-3.1-flash-lite'];
+  const API='https://generativelanguage.googleapis.com/v1beta/models/';
+  const getKey=()=>{try{return localStorage.getItem(KEY)||''}catch(e){return ''}};
+  const setKey=k=>{try{k?localStorage.setItem(KEY,k):localStorage.removeItem(KEY)}catch(e){}};
+  // --- IndexedDB ---
+  let dbp=null;
+  const idb=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('atlas1302',1);r.onupgradeneeded=()=>{r.result.createObjectStore('docs');r.result.createObjectStore('blobs')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  const tx=async(store,mode,fn)=>{const d=await idb();return new Promise((res,rej)=>{const t=d.transaction(store,mode),s=t.objectStore(store);const r=fn(s);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})};
+  const listeners={};
+  const fire=coll=>(listeners[coll]||[]).forEach(f=>f());
+  async function allDocs(coll){const d=await idb();return new Promise((res,rej)=>{const out=[];const c=d.transaction('docs').objectStore('docs').openCursor();c.onsuccess=()=>{const k=c.result;if(!k){res(out);return}if(String(k.key).startsWith(coll+'/'))out.push({id:String(k.key).slice(coll.length+1),v:k.value});k.continue()};c.onerror=()=>rej(c.error)})}
+  const docRef=(path)=>{const coll=path.split('/').slice(0,-1).join('/'),id=path.split('/').pop();return{id,
+    get:async()=>{const v=await tx('docs','readonly',s=>s.get(path));return{exists:!!v,data:()=>v}},
+    set:async v=>{await tx('docs','readwrite',s=>s.put(v,path));fire(coll)},
+    update:async v=>{const cur=await tx('docs','readonly',s=>s.get(path))||{};await tx('docs','readwrite',s=>s.put({...cur,...v},path));fire(coll)},
+    delete:async()=>{await tx('docs','readwrite',s=>s.delete(path));fire(coll)}}};
+  const db={doc:docRef,collection:coll=>{const q={
+    doc:id=>docRef(coll+'/'+(id||('l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)))),
+    orderBy:()=>q,
+    get:async()=>{const a=await allDocs(coll);return{docs:a.map(x=>({id:x.id,data:()=>x.v}))}},
+    onSnapshot:(cb,err)=>{const run=async()=>{try{const a=await allDocs(coll);a.sort((x,y)=>(y.v.createdAt||0)-(x.v.createdAt||0));cb({docs:a.map(x=>({id:x.id,data:()=>x.v}))})}catch(e){err&&err(e)}};(listeners[coll]=listeners[coll]||[]).push(run);run();return()=>{listeners[coll]=listeners[coll].filter(f=>f!==run)}}};return q}};
+  const urls={};
+  const assets={
+    upload:async blob=>{const id='b'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);await tx('blobs','readwrite',s=>s.put(blob,id));return{id,url:blobUrl(id),sizeBytes:blob.size,contentType:blob.type}},
+    delete:async id=>{await tx('blobs','readwrite',s=>s.delete(id));if(urls[id]){URL.revokeObjectURL(urls[id]);delete urls[id]}return{deleted:true}},
+    getBlob:id=>tx('blobs','readonly',s=>s.get(id))
+  };
+  function blobUrl(id){return urls[id]||''}
+  async function preload(ids){for(const id of ids){if(!urls[id]){const b=await assets.getBlob(id).catch(()=>null);if(b)urls[id]=URL.createObjectURL(b)}}}
+  // --- Gemini, présenté comme la fonction sample() de Claude ---
+  const toB64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)});
+  let okModel=null;
+  async function call(body,signal){
+    const order=okModel?[okModel,...MODELS.filter(m=>m!==okModel)]:MODELS;let last=null;
+    for(const m of order){
+      let r;try{r=await fetch(API+m+':generateContent',{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':getKey()},body:JSON.stringify(body)})}
+      catch(e){if(signal&&signal.aborted)throw{code:'cancelled'};last={code:'network',message:'Pas de connexion à Gemini'};continue}
+      const j=await r.json().catch(()=>({}));
+      if(r.ok){okModel=m;return j}
+      const msg=(j.error&&j.error.message)||('HTTP '+r.status);
+      if(r.status===400&&/API key|API_KEY/i.test(msg))throw{code:'bad_key',message:'Clé Gemini refusée'};
+      if(r.status===403)throw{code:'bad_key',message:'Clé Gemini non autorisée pour ce site : '+msg};
+      last={code:r.status===429?'rate_limited':'unavailable',message:msg};
+      if(![404,429,500,503].includes(r.status))break;
+    }
+    throw last||{code:'unavailable'};
+  }
+  async function gsample(input,opts={}){
+    const turns=typeof input==='string'?[{role:'user',content:input}]:input;
+    const contents=turns.map(t=>({role:t.role==='assistant'?'model':'user',parts:[{text:t.content}]}));
+    if(opts.images&&opts.images.length){const last=contents[contents.length-1];for(const b of opts.images){last.parts.push({inline_data:{mime_type:b.type||'image/jpeg',data:await toB64(b)}})}}
+    const tools=opts.tools||[];
+    const body={contents,generationConfig:{temperature:.4}};
+    if(tools.length)body.tools=[{functionDeclarations:tools.map(t=>({name:t.name,description:t.description,parameters:t.inputSchema||{type:'object',properties:{}}}))}];
+    for(let i=0;i<8;i++){
+      const j=await call(body,opts.signal);
+      const c=(j.candidates||[])[0];
+      if(!c||!c.content){throw{code:'refused',message:'Gemini n\'a pas répondu'}}
+      const parts=c.content.parts||[];const calls=parts.filter(p=>p.functionCall);
+      if(!calls.length){const text=parts.filter(p=>p.text&&!p.thought).map(p=>p.text).join('');opts.onText&&opts.onText({text,delta:text});return{text,truncated:c.finishReason==='MAX_TOKENS'}}
+      contents.push(c.content);
+      const resp=[];
+      for(const p of calls){const t=tools.find(x=>x.name===p.functionCall.name);let result;
+        try{result=t?await t.execute(p.functionCall.args||{},{signal:opts.signal}):{erreur:'outil inconnu'}}catch(e){result={erreur:String(e&&e.message||e)}}
+        resp.push({functionResponse:{name:p.functionCall.name,id:p.functionCall.id,response:{result}}})}
+      contents.push({role:'user',parts:resp});
+    }
+    throw{code:'refused',message:'Trop d\'allers-retours'};
+  }
+  gsample.json=async(input,opts={})=>{const r=await gsample(input,opts);const m=r.text.match(/\{[\s\S]*\}/);if(!m)throw{code:'invalid_json',text:r.text};try{return JSON.parse(m[0])}catch(e){throw{code:'invalid_json',text:r.text}}};
+  gsample.limits=async()=>({images:{maxCount:4}});
+  // --- réglage de la clé ---
+  const dlg=document.getElementById('aiDlg'), inp=document.getElementById('aiKey'), msg=document.getElementById('aiMsg');
+  function openSettings(){dlg.hidden=false;inp.value=getKey();msg.textContent=getKey()?'Une clé est enregistrée sur cet appareil.':'';inp.focus()}
+  document.getElementById('aiSave').addEventListener('click',async()=>{
+    const k=inp.value.trim();if(!k){msg.textContent='Colle ta clé d\'abord.';return}
+    msg.textContent='Vérification…';
+    try{const r=await fetch(API.replace('models/','models?pageSize=1'),{headers:{'x-goog-api-key':k}});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error((j.error&&j.error.message)||('HTTP '+r.status))}
+      setKey(k);msg.textContent='Clé enregistrée sur cet appareil. Recharge la page pour activer la discussion et l\'analyse.';setTimeout(()=>location.reload(),1200)}
+    catch(e){msg.textContent='Clé refusée : '+e.message}});
+  document.getElementById('aiForget').addEventListener('click',()=>{setKey('');inp.value='';msg.textContent='Clé effacée de cet appareil.'});
+  document.getElementById('aiClose').addEventListener('click',()=>{dlg.hidden=true});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-ai-settings]')){e.preventDefault();openSettings()}});
+  const active=()=>!(window.claude&&window.claude.use)&&!!getKey();
+  return {active,runtime:()=>({db,assets,sample:gsample}),blobUrl,preload,getBlob:assets.getBlob,openSettings,hasKey:()=>!!getKey()};
+})();
+
+/* ---------- mes photos : dépôt, stockage, analyse ---------- */
 const Photos=(()=>{
   const box=document.getElementById('photoBox'), up=document.getElementById('photoUp'), st=document.getElementById('photoState'), bilan=document.getElementById('bilan');
-  let db=null, assets=null, sample=null, canImg=false, docs=[], started=false, unsub=null;
+  let db=null, assets=null, sample=null, canImg=false, docs=[], started=false, unsub=null, local=false;
   const running={};
   const ZONES=['Moteur','Allumage','Carburation / essence','Embrayage / boîte','Freins avant','Freins arrière','Train avant / direction','Train arrière','Carrosserie / rouille','Plancher / châssis','Électricité / éclairage','Intérieur / sellerie','Autre'];
   document.getElementById('pzone').innerHTML='<option value="">Zone (facultatif)</option>'+ZONES.map(z=>`<option>${z}</option>`).join('');
@@ -786,16 +890,21 @@ const Photos=(()=>{
 
   async function init(){
     if(started)return;started=true;
-    if(!window.claude||!window.claude.use){st.innerHTML='<p class="warn"><b>Version hors ligne</b>Le dépôt et l\'analyse des photos marchent dans la version en ligne de l\'atlas (le lien Claude), pas dans le fichier ouvert sur le PC.</p>';return}
-    st.innerHTML='<p class="src">Connexion au stockage…</p>';
-    [db,assets,sample]=await Promise.all([claude.use('db'),claude.use('assets'),claude.use('sample')]);
+    if(!window.claude||!window.claude.use){
+      if(!Local.active()){started=false;st.innerHTML='<p class="warn"><b>Clé Gemini à coller</b>Sur cette version, tes photos sont gardées dans ce navigateur et analysées par Gemini, avec ta clé gratuite. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';return}
+      local=true;({db,assets,sample}=Local.runtime());
+    }else{
+      st.innerHTML='<p class="src">Connexion au stockage…</p>';
+      [db,assets,sample]=await Promise.all([claude.use('db'),claude.use('assets'),claude.use('sample')]);
+    }
     if(sample){const lim=await sample.limits().catch(()=>null);canImg=!!(lim&&lim.images)}
     if(!db){st.innerHTML='<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude pour retrouver tes photos.</p>';return}
     up.hidden=!assets;
     st.innerHTML=assets?'':'<p class="info"><b>Lecture seule</b>Seul le propriétaire de l\'atlas peut ajouter des photos.</p>';
+    if(local)st.innerHTML='<p class="info"><b>Mode Gemini</b>Photos gardées dans le navigateur de cet appareil, analyse par Gemini (Google). <a href="#" data-ai-settings>Réglages IA</a></p>';
     if(!canImg&&assets)st.innerHTML+='<p class="info"><b>Analyse indisponible ici</b>Les photos sont gardées ; l\'analyse par Claude demande la version en ligne de l\'atlas, ouverte dans Claude.</p>';
     const timer=setTimeout(()=>{if(!docs.length)render()},10000);
-    unsub=db.collection('photos').orderBy('createdAt','desc').onSnapshot(snap=>{clearTimeout(timer);docs=snap.docs.map(d=>({id:d.id,...d.data()}));render()},err=>{clearTimeout(timer);st.innerHTML='<p class="warn"><b>Erreur de lecture</b>'+esc(err.message||err.code)+'</p>'});
+    unsub=db.collection('photos').orderBy('createdAt','desc').onSnapshot(async snap=>{clearTimeout(timer);docs=snap.docs.map(d=>({id:d.id,...d.data()}));if(local)await Local.preload(docs.map(d=>d.asset));render()},err=>{clearTimeout(timer);st.innerHTML='<p class="warn"><b>Erreur de lecture</b>'+esc(err.message||err.code)+'</p>'});
   }
 
   async function shrink(file){
@@ -841,15 +950,16 @@ Réponds uniquement avec un objet JSON, en français :
   }
   async function analyse(ph,blob){
     if(!sample||!canImg)return;
-    running[ph.id]='Claude regarde la photo…';render();
+    running[ph.id]=(local?'Gemini':'Claude')+' regarde la photo…';render();
     try{
+      if(!blob&&local)blob=await Local.getBlob(ph.asset);
       if(!blob)blob=await fetch('/_blob/'+ph.asset).then(r=>{if(!r.ok)throw new Error('photo introuvable');return r.blob()});
       const res=await sample.json(prompt(ph),{images:[blob],tools:tools.map(t=>({...t,execute:(i,c)=>{running[ph.id]='Recherche des références : '+String(i.q||'').slice(0,40)+'…';render();return t.execute(i,c)}}))});
       if(!res||typeof res!=='object')throw {code:'invalid_json'};
       await db.collection('photos').doc(ph.id).update({analysis:res,analysedAt:Date.now()});
       delete running[ph.id];
     }catch(e){
-      const msg={not_granted:'Analyse refusée : autorise Claude pour cet atlas.',rate_limited:'Trop de demandes : réessaie dans un moment.',invalid_json:'Réponse illisible, relance l\'analyse.',image_rejected:'Photo refusée (format ou taille).',refused:'Claude n\'a pas pu analyser cette photo.'}[e&&e.code]||('Analyse interrompue'+(e&&e.message?' : '+e.message:''));
+      const msg={bad_key:'Clé Gemini refusée : vérifie-la dans Réglages IA.',unavailable:'Gemini est surchargé : réessaie dans un moment.',network:'Pas de connexion internet.',not_granted:'Analyse refusée : autorise Claude pour cet atlas.',rate_limited:'Trop de demandes : réessaie dans un moment.',invalid_json:'Réponse illisible, relance l\'analyse.',image_rejected:'Photo refusée (format ou taille).',refused:'Claude n\'a pas pu analyser cette photo.'}[e&&e.code]||('Analyse interrompue'+(e&&e.message?' : '+e.message:''));
       running[ph.id]=msg;render();setTimeout(()=>{if(running[ph.id]===msg){delete running[ph.id];render()}},12000);return;
     }
     render();
@@ -878,7 +988,7 @@ Réponds uniquement avec un objet JSON, en français :
     if(!box)return;
     const busy=Object.entries(running).filter(([k])=>k.startsWith('up')).map(([,m])=>`<div class="pcard busy"><p class="src">${esc(m)}</p></div>`).join('');
     box.innerHTML=busy+(docs.length?docs.map(ph=>`<article class="pcard" data-id="${ph.id}">
-      <div class="pimg"><img src="/_blob/${esc(ph.asset)}" alt="${esc(ph.name||'Photo')}" loading="lazy"></div>
+      <div class="pimg"><img src="${local?Local.blobUrl(ph.asset):'/_blob/'+esc(ph.asset)}" alt="${esc(ph.name||'Photo')}" loading="lazy"></div>
       <div class="pbody">
         <div class="meta"><span>${esc(fmtDate(ph.createdAt))}</span>${ph.zone?`<span><b>${esc(ph.zone)}</b></span>`:''}<span>${esc(ph.name||'')}</span></div>
         ${ph.note?`<p class="src">« ${esc(ph.note)} »</p>`:''}
@@ -988,8 +1098,11 @@ CONTEXTE : ${currentPage()}`;
   async function boot(){
     if(booting)return booting;
     return booting=(async()=>{
-      if(!window.claude||!window.claude.use){note.innerHTML=`La discussion avec Claude fonctionne dans la version Claude de l'atlas : <a href="${ARTIFACT}" target="_blank" rel="noopener">l'ouvrir ↗</a>`;note.hidden=false;form.hidden=true;return}
-      [db,sample]=await Promise.all([claude.use('db'),claude.use('sample')]);
+      if(!window.claude||!window.claude.use){
+        if(!Local.active()){booting=null;note.innerHTML=`Sur cette version, la discussion passe par Gemini avec ta clé gratuite : <a href="#" data-ai-settings>coller ma clé Gemini</a>. Ou <a href="${ARTIFACT}" target="_blank" rel="noopener">ouvre la version Claude ↗</a>.`;note.hidden=false;form.hidden=true;return}
+        ({db,sample}=Local.runtime());note.hidden=true;form.hidden=false;
+        document.querySelector('#chatPanel .chat-h b').textContent='Atelier · discussion (Gemini)';document.getElementById('chatCfg').hidden=false;
+      }else{[db,sample]=await Promise.all([claude.use('db'),claude.use('sample')]);}
       if(!sample){note.textContent="Claude n'est pas disponible dans cette vue.";note.hidden=false;form.hidden=true;return}
       const lim=await sample.limits().catch(()=>null);canImg=!!(lim&&lim.images);pic.closest('label').hidden=!canImg;
       if(db){try{const s=await db.doc('chat/fil').get();const d=s.data();if(d&&Array.isArray(d.turns))turns=d.turns}catch(e){}}
@@ -1020,7 +1133,7 @@ CONTEXTE : ${currentPage()}`;
     if(img&&canImg)opts.images=[img];
     try{const r=await sample(input,opts);out.classList.remove('wait');out.innerHTML=md(r.text);turns.push({role:'assistant',content:r.text,t:Date.now()});await save()}
     catch(err){out.classList.remove('wait');
-      const m={cancelled:'(arrêté)',not_granted:"Il faut autoriser Claude pour cet atlas : rouvre la discussion et accepte la demande.",rate_limited:"Trop de messages d'un coup : réessaie dans un moment.",refused:"Je ne peux pas répondre à ce message.",image_rejected:"La photo n'est pas passée (format ou taille)."}[err&&err.code]||"La réponse a été interrompue, renvoie ton message.";
+      const m={bad_key:'Clé Gemini refusée : vérifie-la dans Réglages IA.',unavailable:'Gemini est surchargé en ce moment : réessaie dans une minute.',network:'Pas de connexion internet.',cancelled:'(arrêté)',not_granted:"Il faut autoriser Claude pour cet atlas : rouvre la discussion et accepte la demande.",rate_limited:"Trop de messages d'un coup : réessaie dans un moment.",refused:"Je ne peux pas répondre à ce message.",image_rejected:"La photo n'est pas passée (format ou taille)."}[err&&err.code]||"La réponse a été interrompue, renvoie ton message.";
       if(err&&err.text){out.innerHTML=md(err.text)+`<p class="src">${esc(m)}</p>`;turns.push({role:'assistant',content:err.text,t:Date.now()});await save()}
       else{out.innerHTML=`<p class="src">${esc(m)}</p>`;turns.pop()}}
     finally{ctl=null;send.hidden=false;stop.hidden=true;img=null;pic.value='';picName.textContent=''}
