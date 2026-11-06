@@ -796,6 +796,8 @@ const Local=(()=>{
   const API='https://generativelanguage.googleapis.com/v1beta/models/';
   const getKey=()=>{try{return localStorage.getItem(KEY)||''}catch(e){return ''}};
   const setKey=k=>{try{k?localStorage.setItem(KEY,k):localStorage.removeItem(KEY)}catch(e){}};
+  // lien personnel : …/atlas-1302/#cle=XXXX enregistre la clé sur l'appareil puis l'efface de l'adresse
+  try{const m=location.hash.match(/^#cle=([^&#]+)/);if(m){setKey(decodeURIComponent(m[1]).trim());history.replaceState(null,'',location.pathname+location.search+'#accueil')}}catch(e){}
   // --- IndexedDB ---
   let dbp=null;
   const idb=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('atlas1302',1);r.onupgradeneeded=()=>{r.result.createObjectStore('docs');r.result.createObjectStore('blobs')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
