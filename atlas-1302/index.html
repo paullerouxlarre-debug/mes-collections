@@ -368,6 +368,23 @@ tfoot th{border-top:1px solid var(--line);font:600 13px var(--mono);text-transfo
 
 .pok{margin:0;font:600 13px var(--body);color:var(--ok)}
 .pok-t{display:inline-block;font:600 11px var(--mono);color:var(--ok);background:var(--ok-soft);border-radius:2px;padding:1px 6px;margin:0 4px 3px 0}
+
+/* détail facture : mise en page PC */
+td:has(> .fdetail){background:var(--paper);padding:16px 18px}
+.fdetail{grid-template-columns:minmax(0,300px) minmax(0,1fr)!important;gap:22px!important;align-items:start}
+.fdetail.nopv{grid-template-columns:minmax(0,1fr)!important}
+.fdetail > a img{max-height:520px;object-fit:contain;background:#fff}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 16px}
+.fgrid label{min-width:0!important}
+.fgrid .w2{grid-column:span 2}
+.fgrid input,.fgrid select{width:100%}
+@media (max-width:900px){.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.fgrid{grid-template-columns:1fr}.fgrid .w2{grid-column:auto}}
+.payf{max-width:760px;background:var(--sheet)}
+.prow [data-pn]{flex:1 1 260px!important;min-width:180px}
+.prow [data-pm]{width:150px!important}
+.payf .actions{flex-wrap:wrap}
+.fform > .actions{justify-content:flex-start;border-top:1px solid var(--line2);padding-top:12px}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -1445,12 +1462,16 @@ const Budget=(()=>{
   function factDetail(f){
     const d=f.data||{};
     const lignes=(d.lignes||[]).map(l=>`<tr><td>${esc(l.designation)}<small>${esc(l.famille||'')}</small></td><td class="n">${esc(l.ref||'')}</td><td class="n">${esc(l.qte??'')}</td><td class="n" style="text-align:right">${l.prix_ttc!=null?e0(l.prix_ttc):''}</td></tr>`).join('');
-    return `<div class="fdetail">
+    return `<div class="fdetail${f.preview?'':' nopv'}">
       ${f.preview?`<a href="${imgSrc(f.preview)}" target="_blank" rel="noopener"><img src="${imgSrc(f.preview)}" alt="Facture"></a>`:''}
       <div class="fform">
-        <div class="frow"><label>Fournisseur<input data-k="fournisseur" value="${esc(d.fournisseur||'')}"></label><label>Date<input type="date" data-k="date" value="${esc(d.date||'')}"></label></div>
-        <div class="frow"><label>Total TTC (€)<input type="number" step="0.01" data-k="total_ttc" value="${d.total_ttc!=null?esc(d.total_ttc):''}"></label><label>Groupe<select data-k="groupe">${GROUPES.map(g=>`<option ${g===d.groupe?'selected':''}>${esc(g)}</option>`).join('')}</select></label></div>
-        <label>Remarque<input data-k="remarque" value="${esc(d.remarque||'')}"></label>
+        <div class="fgrid">
+          <label class="w2">Fournisseur<input data-k="fournisseur" value="${esc(d.fournisseur||'')}" placeholder="ex. Mecatechnic"></label>
+          <label>Date<input type="date" data-k="date" value="${esc(d.date||'')}"></label>
+          <label>Total TTC (€)<input type="number" step="0.01" data-k="total_ttc" value="${d.total_ttc!=null?esc(d.total_ttc):''}"></label>
+          <label class="w2">Famille principale<select data-k="groupe">${GROUPES.map(g=>`<option ${g===d.groupe?'selected':''}>${esc(g)}</option>`).join('')}</select></label>
+          <label class="w2">Remarque<input data-k="remarque" value="${esc(d.remarque||'')}"></label>
+        </div>
         ${payBlock(f)}
         ${lignes?`<div class="tw"><table><thead><tr><th>Ligne</th><th>Réf.</th><th>Qté</th><th style="text-align:right">TTC</th></tr></thead><tbody>${lignes}</tbody></table></div>`:''}
         <div class="actions"><button class="btn pri" type="button" data-fsave="${f.id}">Enregistrer</button>${f.asset&&rt.sample?`<button class="btn" type="button" data-fread="${f.id}">Relire avec l'IA</button>`:''}<button class="btn" type="button" data-fdel="${f.id}">Supprimer</button></div>
