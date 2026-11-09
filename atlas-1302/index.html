@@ -315,6 +315,8 @@ body.chat-open .chat-fab{display:none}
 .blegend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 .blegend .capk{background:var(--ok);width:4px}
 .bset label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.bset label small{display:inline;font-size:11px;color:var(--ok)}
+#homeFig a,#rMini a{color:inherit}
 .bset input,.bset select{font:14px var(--mono);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:6px 8px;width:150px}
 .bwish{width:100%;font:14px/1.5 var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px 12px;resize:vertical}
 .bwish:focus-visible{outline:2px solid var(--accent)}
@@ -466,6 +468,10 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
         </div>
         <div class="gallery" id="homePhoto" style="grid-template-columns:1fr"></div>
       </div>
+      <section class="card" id="homeFigBox">
+        <header class="card-h"><span class="code">€</span><h3>Ma 1302 en chiffres</h3><span class="src" style="margin-left:auto">mis à jour depuis le budget, les factures et l'expertise</span></header>
+        <div class="bkpi" id="homeFig"></div>
+      </section>
       <section class="phead">
         <span class="kicker">Mon chantier</span>
         <div class="todo">
@@ -517,6 +523,38 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
       </div>
     </div>
 
+    <div class="page" data-page="revente" hidden>
+      <div class="phead"><span class="kicker">Budget et achats</span><h1>Valeur de revente de ma 1302</h1>
+        <p class="lead">Ce que vaut ta voiture aujourd'hui et après travaux, comparé à ce que tu y as mis. Le prix d'achat et l'état visé se règlent ici une seule fois : le budget, l'expertise IA et la discussion les reprennent automatiquement.</p></div>
+      <div id="rState"></div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <section class="card">
+          <header class="card-h"><span class="code">€</span><h3>Ma voiture et sa valeur</h3></header>
+          <p class="src">Fourchettes tirées de <b id="rN"></b> annonces et ventes de Coccinelle 1300, 1302 et 1303 (1969-1975) dans 8 pays (France, Allemagne, Pays-Bas, Belgique, Italie, Espagne, Autriche, enchères), chez des particuliers et des professionnels, recoupées avec trois cotes. Relevé du <span class="n" id="rDate"></span>. Ce sont surtout des prix demandés : la vente se conclut souvent 5 à 15 % plus bas.</p>
+          <div class="tools bset"><label>Prix d'achat de ma voiture (€) <small>repris partout dans l'atlas</small><input id="rAchat" type="number" min="0" step="100" placeholder="ex. 3000"></label><label>État visé après travaux<select id="rCible" style="width:260px"></select></label></div>
+          <div class="bkpi" id="rKpi"></div>
+          <div class="tw"><table><thead><tr><th>État</th><th style="text-align:right">Fourchette</th><th style="text-align:right">Médiane</th><th></th></tr></thead><tbody id="rTiers"></tbody></table></div>
+          <h4 class="ptitle">Ta 1302 face aux modèles équivalents</h4>
+          <div class="mchart" id="mChart"></div>
+          <p class="src">Barre : moitié centrale des prix (du 1er au 3e quartile) · trait épais : médiane · points : chaque annonce · repère orange : ta voiture aujourd'hui · repère vert : après travaux.</p>
+          <div class="two"><div><h4 class="ptitle">Médiane des berlines par pays</h4><div class="tw"><table><tbody id="mPays"></tbody></table></div></div>
+            <div><h4 class="ptitle">Médiane des berlines par vendeur</h4><div class="tw"><table><tbody id="mVend"></tbody></table></div></div></div>
+          <details class="rdet" open><summary>Toutes les annonces comparées</summary>
+            <div class="tools mfil">
+              <select id="fMod" aria-label="Modèle"><option value="">Tous modèles</option><option>1302</option><option>1303</option><option>1300</option></select>
+              <select id="fCar" aria-label="Carrosserie"><option value="">Berline et cabriolet</option><option>berline</option><option>cabriolet</option></select>
+              <select id="fPays" aria-label="Pays"></select>
+              <select id="fVend" aria-label="Vendeur"><option value="">Tous vendeurs</option><option>particulier</option><option>professionnel</option><option>enchères</option></select>
+              <span class="src" id="fN"></span></div>
+            <div class="tw"><table><thead><tr><th>Modèle</th><th>Année</th><th>Carrosserie</th><th>État annoncé</th><th>Vendeur</th><th>Pays</th><th style="text-align:right">Prix</th><th></th></tr></thead><tbody id="rComps"></tbody></table></div>
+            <p class="src" id="rCab"></p>
+            <ul class="points" id="rSrc"></ul>
+          </details>
+          <p class="src">Ce qui fait monter le prix : factures et photos de la restauration, numéros de châssis et moteur d'origine (« matching numbers »), couleur d'origine, carte grise collection, absence de rouille dans les bas de caisse. Une 1302 berline vaut sensiblement moins qu'un cabriolet ou qu'une Coccinelle d'avant 1967.</p>
+        </section>
+      </div>
+    </div>
+
     <div class="page" data-page="commandes" hidden>
       <div class="phead"><span class="kicker">Mes pièces</span><h1>Pièces commandées</h1>
         <p class="lead">Toutes les pièces lues sur tes factures, regroupées par référence et rangées par famille. Les quantités et montants s'additionnent quand une même pièce apparaît sur plusieurs factures. Suis chaque pièce : commandée, reçue, montée. Les pièces commandées sont aussi signalées dans les tableaux du catalogue et dans ta liste.</p></div>
@@ -550,29 +588,10 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
         </section>
 
         <section class="card">
-          <header class="card-h"><span class="code">€</span><h3>Valeur de revente de ma 1302</h3></header>
-          <p class="src">Fourchettes tirées de <b id="rN"></b> annonces et ventes de Coccinelle 1300, 1302 et 1303 (1969-1975) dans 8 pays (France, Allemagne, Pays-Bas, Belgique, Italie, Espagne, Autriche, enchères), chez des particuliers et des professionnels, recoupées avec trois cotes. Relevé du <span class="n" id="rDate"></span>. Ce sont surtout des prix demandés : la vente se conclut souvent 5 à 15 % plus bas.</p>
-          <div class="tools bset"><label>Prix d'achat de ma voiture (€)<input id="rAchat" type="number" min="0" step="100" placeholder="ex. 3000"></label><label>État visé après travaux<select id="rCible" style="width:260px"></select></label></div>
-          <div class="bkpi" id="rKpi"></div>
-          <div class="tw"><table><thead><tr><th>État</th><th style="text-align:right">Fourchette</th><th style="text-align:right">Médiane</th><th></th></tr></thead><tbody id="rTiers"></tbody></table></div>
-          <h4 class="ptitle">Ta 1302 face aux modèles équivalents</h4>
-          <div class="mchart" id="mChart"></div>
-          <p class="src">Barre : moitié centrale des prix (du 1er au 3e quartile) · trait épais : médiane · points : chaque annonce · repère orange : ta voiture aujourd'hui · repère vert : après travaux.</p>
-          <div class="two"><div><h4 class="ptitle">Médiane des berlines par pays</h4><div class="tw"><table><tbody id="mPays"></tbody></table></div></div>
-            <div><h4 class="ptitle">Médiane des berlines par vendeur</h4><div class="tw"><table><tbody id="mVend"></tbody></table></div></div></div>
-          <details class="rdet" open><summary>Toutes les annonces comparées</summary>
-            <div class="tools mfil">
-              <select id="fMod" aria-label="Modèle"><option value="">Tous modèles</option><option>1302</option><option>1303</option><option>1300</option></select>
-              <select id="fCar" aria-label="Carrosserie"><option value="">Berline et cabriolet</option><option>berline</option><option>cabriolet</option></select>
-              <select id="fPays" aria-label="Pays"></select>
-              <select id="fVend" aria-label="Vendeur"><option value="">Tous vendeurs</option><option>particulier</option><option>professionnel</option><option>enchères</option></select>
-              <span class="src" id="fN"></span></div>
-            <div class="tw"><table><thead><tr><th>Modèle</th><th>Année</th><th>Carrosserie</th><th>État annoncé</th><th>Vendeur</th><th>Pays</th><th style="text-align:right">Prix</th><th></th></tr></thead><tbody id="rComps"></tbody></table></div>
-            <p class="src" id="rCab"></p>
-            <ul class="points" id="rSrc"></ul>
-          </details>
-          <p class="src">Ce qui fait monter le prix : factures et photos de la restauration, numéros de châssis et moteur d'origine (« matching numbers »), couleur d'origine, carte grise collection, absence de rouille dans les bas de caisse. Une 1302 berline vaut sensiblement moins qu'un cabriolet ou qu'une Coccinelle d'avant 1967.</p>
+          <header class="card-h"><span class="code">↗</span><h3>Valeur de revente</h3><a class="btn" href="#revente" style="margin-left:auto">Voir la comparaison complète →</a></header>
+          <div class="bkpi" id="rMini"></div>
         </section>
+
 
         <section class="card">
           <header class="card-h"><span class="code">1</span><h3>Factures déjà payées</h3></header>
@@ -812,25 +831,28 @@ const best=p=>{let b=null;(p[3]||[]).forEach(h=>{const x=price(h[2]);if(x&&(!b||
 
 /* ---------- sommaire ---------- */
 const nav=document.getElementById('nav');
-let h='<div class="sec">Atelier</div>'+
+let h='<div class="sec">Ma voiture</div>'+
   '<a class="it" href="#accueil"><span class="n">⌂</span>Vue d\'ensemble</a>'+
+  '<a class="it" href="#expertise"><span class="n">★</span>Expertise IA</a>'+
   '<a class="it" href="#photos"><span class="n">◉</span>Mes photos et analyses</a>'+
   '<a class="it" href="#diagnostic"><span class="n">◎</span>Diagnostic moteur du 4 nov.</a>'+
-  '<a class="it" href="#couples"><span class="n">Nm</span>Couples de serrage</a>'+
   '<a class="it" href="#fiche"><span class="n">i</span>Fiche technique</a>'+
-  '<a class="it" href="#liste"><span class="n">+</span>Ma liste de pièces</a>'+
-  '<a class="it" href="#expertise"><span class="n">★</span>Expertise IA de ma voiture</a>'+
-  '<a class="it" href="#commandes"><span class="n">✓</span>Pièces commandées (factures)</a>'+
+  '<div class="sec">Budget et achats</div>'+
   '<a class="it" href="#budget"><span class="n">€</span>Budget travaux et factures</a>'+
-  (window.claude&&window.claude.use?'':'<a class="it" href="#" data-ai-settings><span class="n">⚙</span>Réglages IA (clé Gemini)</a>')+
+  '<a class="it" href="#revente"><span class="n">↗</span>Valeur de revente</a>'+
+  '<a class="it" href="#commandes"><span class="n">✓</span>Pièces commandées</a>'+
+  '<a class="it" href="#liste"><span class="n">+</span>Ma liste de pièces</a>'+
+  '<div class="sec">Atelier</div>'+
+  '<a class="it" href="#couples"><span class="n">Nm</span>Couples de serrage</a>'+
   '<div class="sec">Pièces par groupe</div>';
+const navTail=(window.claude&&window.claude.use?'':'<div class="sec">Réglages</div><a class="it" href="#" data-ai-settings><span class="n">⚙</span>Réglages IA (clé Gemini)</a>');
 Object.keys(D.chapters).forEach(c=>{
   h+=`<details data-ch="${c}"><summary><span class="n">${pad(c)}</span>${esc(D.chapters[c][0])}</summary><a class="it" href="#ch-${c}"><span class="n">≡</span>Sommaire du groupe</a>`;
   V.filter(v=>v.ch==c).forEach(v=>{h+=`<a class="it" href="#a-${v.id}">${esc(v.t)}</a>`});
   D.procs.filter(p=>p.ch==c).forEach(p=>{h+=`<a class="it proc" href="#${p.id}"><span class="n">${p.k}</span>${esc(p.t)}</a>`});
   h+='</details>';
 });
-nav.innerHTML=h;
+nav.innerHTML=h+navTail;
 const menuBtn=document.querySelector('.menu');
 menuBtn.addEventListener('click',()=>{const o=document.body.classList.toggle('nav-open');menuBtn.setAttribute('aria-expanded',o)});
 nav.addEventListener('click',e=>{if(e.target.closest('a'))document.body.classList.remove('nav-open')});
@@ -942,7 +964,7 @@ function show(){
   const hh=decodeURIComponent(location.hash.slice(1))||'accueil';
   let page=pages.find(p=>p.dataset.page===hh&&p!==dyn), cur=hh, ch=null;
   pages.forEach(p=>p.hidden=true);
-  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget')Budget.open();if(hh==='commandes')Orders.open();if(hh==='expertise')Expert.open()}
+  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget'||hh==='revente'||hh==='accueil')Budget.open();if(hh==='commandes')Orders.open();if(hh==='expertise')Expert.open()}
   else{
     let html='';
     if(hh.startsWith('a-')&&byId[hh.slice(2)]){const v=byId[hh.slice(2)];html=pageView(v);ch=v.ch}
@@ -1435,22 +1457,32 @@ const Budget=(()=>{
     if(Local.active())return {...Local.runtime(),local:true};
     return null;
   }
+  let staticDone=false;
+  function initStatic(){
+    if(staticDone)return;staticDone=true;
+    $('rDate').textContent=MARKET.date;$('rN').textContent=MARKET.all.length;['fMod','fCar','fPays','fVend'].forEach(id=>$(id).addEventListener('change',render));$('rCab').textContent=MARKET.cabrio;$('rSrc').innerHTML=MARKET.sources.map(x=>`<li><div><a href="${esc(x[1])}" target="_blank" rel="noopener">${esc(x[0])} ↗</a> — ${esc(x[2])}</div></li>`).join('');
+    try{const l=JSON.parse(localStorage.getItem('cat1302-voiture')||'null');if(l)regl={...regl,...l}}catch(e){}
+    fillFields();
+  }
+  function fillFields(){$('bMax').value=regl.max||'';$('rAchat').value=regl.achat||'';$('rCible').innerHTML=MARKET.tiers.slice(1).map(x=>`<option value="${x.id}" ${x.id===regl.cible?'selected':''}>${esc(x.nom)}</option>`).join('');$('bMode').value=regl.mode;$('bTaux').value=regl.taux;$('bMarge').value=regl.marge}
   async function open(){
-    if(started){if(rt)render();return}
+    initStatic();
+    if(started){render();return}
     started=true;
     rt=await getRT();
-    if(!rt){started=false;$('bState').innerHTML=(window.claude&&window.claude.use)?'<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude.</p>':'<p class="warn"><b>Clé Gemini à coller</b>Sur cette version, le budget est gardé dans ce navigateur et les factures sont lues par Gemini. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';return}
+    if(!rt){started=false;render();$('rState').innerHTML=(window.claude&&window.claude.use)?'':'<p class="info"><b>Sans clé Gemini</b>Ton prix d\'achat et l\'état visé restent enregistrés dans ce navigateur. Les montants payés et le reste à faire viennent du budget, qui demande ta clé Gemini sur cette version.</p>';$('bState').innerHTML=(window.claude&&window.claude.use)?'<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude.</p>':'<p class="warn"><b>Clé Gemini à coller</b>Sur cette version, le budget est gardé dans ce navigateur et les factures sont lues par Gemini. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';return}
     local=rt.local;
     $('bState').innerHTML=local?'<p class="info"><b>Mode Gemini</b>Budget et factures gardés dans le navigateur de cet appareil. <a href="#" data-ai-settings>Réglages IA</a></p>':'';
     $('bApp').hidden=false;
-    $('rDate').textContent=MARKET.date;$('rN').textContent=MARKET.all.length;['fMod','fCar','fPays','fVend'].forEach(id=>$(id).addEventListener('change',render));$('rCab').textContent=MARKET.cabrio;$('rSrc').innerHTML=MARKET.sources.map(x=>`<li><div><a href="${esc(x[1])}" target="_blank" rel="noopener">${esc(x[0])} ↗</a> — ${esc(x[2])}</div></li>`).join('');
+    $('rState').innerHTML='';
     try{const r=await rt.db.doc('budget/reglages').get();const d=r.data();if(d)regl={...regl,...d}}catch(e){}
     try{const p=await rt.db.doc('budget/plan').get();const d=p.data();if(d&&Array.isArray(d.postes))plan=d}catch(e){}
-    $('bMax').value=regl.max||'';$('rAchat').value=regl.achat||'';$('rCible').innerHTML=MARKET.tiers.slice(1).map(x=>`<option value="${x.id}" ${x.id===regl.cible?'selected':''}>${esc(x.nom)}</option>`).join('');$('bMode').value=regl.mode;$('bTaux').value=regl.taux;$('bMarge').value=regl.marge;
+    try{const l=JSON.parse(localStorage.getItem('cat1302-voiture')||'null');if(l&&!regl.achat&&l.achat)regl.achat=l.achat}catch(e){}
+    fillFields();
     rt.db.collection('factures').orderBy('createdAt','desc').onSnapshot(async s=>{facts=s.docs.map(d=>({id:d.id,...d.data()}));if(local)await Local.preload(facts.map(f=>f.preview).filter(Boolean));render();subs.forEach(fn=>{try{fn()}catch(e){}})},err=>{$('bState').innerHTML='<p class="warn"><b>Erreur</b>'+esc(err.message||err.code)+'</p>'});
     render();
   }
-  const saveRegl=()=>rt&&rt.db.doc('budget/reglages').set(regl).catch(()=>{});
+  const saveRegl=()=>{try{localStorage.setItem('cat1302-voiture',JSON.stringify(regl))}catch(e){}if(rt)rt.db.doc('budget/reglages').set(regl).catch(()=>{})};
   const savePlan=()=>rt&&rt.db.doc('budget/plan').set({...plan,updatedAt:Date.now()}).catch(()=>{});
 
   /* ----- chiffres ----- */
@@ -1472,7 +1504,7 @@ const Budget=(()=>{
 
   /* ----- rendu ----- */
   function render(){
-    if(!rt)return;
+    if(!rt){const t0=totals();renderResale(t0);renderHome(t0);return}
     const t=totals(), over=t.budget&&t.projMax>t.budget, overMin=t.budget&&t.projMin>t.budget;
     $('bKpi').innerHTML=`
       <div><span>Déjà payé</span><b>${e0(t.paye)}</b><em>${facts.length} facture${facts.length>1?'s':''}</em></div>
@@ -1504,7 +1536,7 @@ const Budget=(()=>{
     // groupes
     const gs=byGroup(), gmax=Math.max(1,...gs.map(([,v])=>v.paye+v.max));
     $('bGroups').innerHTML=gs.length?gs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n" style="text-align:right">${e0(v.paye)}</td><td class="n" style="text-align:right">${v.max?e0(v.min)+' – '+e0(v.max):'—'}</td><td class="gbar"><span class="paid" style="width:${v.paye/gmax*100}%"></span><span class="est" style="width:${v.max/gmax*100}%"></span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">La répartition apparaîtra avec les premières factures ou la première estimation.</td></tr>';
-    renderFam();renderPay();renderResale(t);
+    renderFam();renderPay();renderResale(t);renderHome(t);
     $('bTaux').closest('label').hidden=$('bMode').value!=='garage';
   }
   /* ----- payeurs ----- */
@@ -1556,16 +1588,30 @@ const Budget=(()=>{
     $('pStats').innerHTML=h;
   }
   function renderResale(t){
-    const tiers=MARKET.tiers,cible=tiers.find(x=>x.id===regl.cible)||tiers[2],achat=num(regl.achat);
-    const invMin=achat+t.paye+t.min,invMax=achat+t.paye+t.max;
-    const gainMin=cible.min-invMax,gainMax=cible.max-invMin,gainMed=cible.med-(invMin+invMax)/2;
+    const tiers=MARKET.tiers,R=resaleNums(t),cible=R.cible,achat=R.achat,invMin=R.invMin,invMax=R.invMax;
+    const gainMin=num(R.aft[0])-invMax,gainMax=num(R.aft[1])-invMin,gainMed=R.gain;
     $('rTiers').innerHTML=tiers.map(x=>`<tr class="${x.id===cible.id?'cible':''}${x.id==='restaurer'?' auj':''}"><td><b>${esc(x.nom)}</b><small>${esc(x.desc)}</small></td><td class="n" style="text-align:right">${e0(x.min)} – ${e0(x.max)}</td><td class="n" style="text-align:right"><b>${e0(x.med)}</b></td><td>${x.id==='restaurer'?'<span class="tag cab">aujourd\'hui</span>':''}${x.id===cible.id?'<span class="tag ok">visé</span>':''}</td></tr>`).join('');
     const cls=gainMax<0?'bad':gainMin<0?'warnk':'okk';
-    $('rKpi').innerHTML=`<div><span>Valeur aujourd'hui (à restaurer)</span><b>${e0(tiers[0].min)} – ${e0(tiers[0].max)}</b><em>moteur déposé, travaux en cours</em></div>
-      <div><span>Valeur après travaux</span><b>${e0(cible.min)} – ${e0(cible.max)}</b><em>${esc(cible.nom)} · médiane ${e0(cible.med)}</em></div>
+    $('rKpi').innerHTML=`<div><span>Valeur aujourd'hui</span><b>${e0(R.now[0])} – ${e0(R.now[1])}</b><em>${R.src==='expertise IA'?'d\'après ton expertise IA':'moteur déposé, travaux en cours'}</em></div>
+      <div><span>Valeur après travaux</span><b>${e0(R.aft[0])} – ${e0(R.aft[1])}</b><em>${esc(cible.nom)} · ${R.src}</em></div>
       <div><span>Investissement total</span><b>${e0(invMin)} – ${e0(invMax)}</b><em>achat ${achat?e0(achat):'non renseigné'} + payé + reste à faire</em></div>
       <div class="${cls}"><span>Bilan à la revente</span><b>${gainMed>=0?'+':'−'}${e0(Math.abs(gainMed))}</b><em>${gainMax<0?'moins-value probable':gainMin<0?'entre '+e0(gainMin)+' et +'+e0(gainMax):'plus-value probable : +'+e0(gainMin)+' à +'+e0(gainMax)}</em></div>`;
     renderMarket(tiers[0],cible);
+  }
+  function resaleNums(t){
+    const T=MARKET.tiers,cible=T.find(x=>x.id===regl.cible)||T[2],ex=(typeof Expert!=='undefined'&&Expert.last())||null,ev=ex&&ex.valeur||{};
+    const now=(ev.aujourdhui&&ev.aujourdhui.length===2)?ev.aujourdhui:[T[0].min,T[0].max];
+    const aft=(ev.apres_travaux&&ev.apres_travaux.length===2)?ev.apres_travaux:[cible.min,cible.max];
+    const achat=num(regl.achat),invMin=achat+t.paye+t.min,invMax=achat+t.paye+t.max,gain=(num(aft[0])+num(aft[1]))/2-(invMin+invMax)/2;
+    return {cible,now,aft,achat,invMin,invMax,gain,src:ex?'expertise IA':'cote du marché'};
+  }
+  function renderHome(t){
+    const R=resaleNums(t),el=$('homeFig');if(!el)return;
+    el.innerHTML=`<div><span>Prix d'achat</span><b>${R.achat?e0(R.achat):'—'}</b><em>${R.achat?'':'<a href="#revente">à renseigner</a>'}</em></div>
+      <div><span>Déjà payé</span><b>${e0(t.paye)}</b><em><a href="#budget">${facts.length} facture${facts.length>1?'s':''}</a></em></div>
+      <div><span>Reste à faire</span><b>${e0(t.min)} – ${e0(t.max)}</b><em><a href="#budget">${plan.postes.filter(p=>!p.fait).length} postes</a></em></div>
+      <div class="${R.gain>=0?'okk':'bad'}"><span>Valeur après travaux</span><b>${e0(R.aft[0])} – ${e0(R.aft[1])}</b><em><a href="#revente">bilan ${R.gain>=0?'+':'−'}${e0(Math.abs(R.gain))}</a> · ${R.src}</em></div>`;
+    const mini=$('rMini');if(mini)mini.innerHTML=`<div><span>Aujourd'hui</span><b>${e0(R.now[0])} – ${e0(R.now[1])}</b><em>${R.src}</em></div><div><span>Après travaux</span><b>${e0(R.aft[0])} – ${e0(R.aft[1])}</b><em>${esc(R.cible.nom)}</em></div><div><span>Investissement total</span><b>${e0(R.invMin)} – ${e0(R.invMax)}</b><em>achat ${R.achat?e0(R.achat):'non renseigné'} + payé + reste</em></div><div class="${R.gain>=0?'okk':'bad'}"><span>Bilan à la revente</span><b>${R.gain>=0?'+':'−'}${e0(Math.abs(R.gain))}</b><em>milieu des fourchettes</em></div>`;
   }
   function renderMarket(now,after){
     const ex=(typeof Expert!=='undefined'&&Expert.last())||null,ev=ex&&ex.valeur||{};
@@ -1940,15 +1986,16 @@ Réponds uniquement avec un objet JSON :
       const r=await rt.sample.json(prompt,{images:blobs,tools,modelTier:'complex'});
       if(!r||typeof r!=='object')throw{code:'invalid_json'};
       exp={r,date:Date.now(),nbPhotos:photos.length,ia:rt.local?'Gemini':'Claude'};
-      await rt.db.doc('expertise/derniere').set(exp);msg.textContent='Expertise terminée.';
+      await rt.db.doc('expertise/derniere').set(exp);msg.textContent='Expertise terminée : revente, budget et accueil sont mis à jour.';Budget.open();
     }catch(e){msg.textContent={bad_key:'Clé Gemini refusée : vérifie-la dans Réglages IA.',unavailable:'IA surchargée : réessaie dans une minute.',rate_limited:'Trop de demandes : réessaie dans une minute.',not_granted:'Autorise Claude pour cet atlas, puis relance.',invalid_json:'Réponse illisible : relance l\'expertise.',image_rejected:'Une photo a été refusée (format ou taille).'}[e&&e.code]||'Expertise interrompue : relance.'}
     finally{busy=false;render()}
   }
   $('xRun').addEventListener('click',run);
-  return {open,last:()=>exp&&exp.r};
+  async function preload(){if(exp)return;const r0=Budget.rt&&Budget.rt();if(!r0)return;try{const r=await r0.db.doc('expertise/derniere').get();exp=r.data()||null;if(exp)Budget.open()}catch(e){}}
+  return {open,preload,last:()=>exp&&exp.r};
 })();
 
-setTimeout(()=>{Budget.open().catch(()=>{})},50);
+setTimeout(()=>{Budget.open().then(()=>Expert.preload&&Expert.preload()).catch(()=>{})},50);
 
 window.addEventListener('hashchange',show);
 show();
