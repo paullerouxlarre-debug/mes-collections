@@ -334,6 +334,14 @@ input.mn{width:84px;font:13px var(--mono);padding:4px 6px;border:1px solid var(-
 .frow{display:flex;gap:10px;flex-wrap:wrap}
 .gbar{display:flex;align-items:center;gap:2px}.gbar span{display:block;height:10px;border-radius:2px}
 #bHyp ul{margin:4px 0 0;padding-left:18px}
+
+.ftabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.ftabs button{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:1px;font:600 14px var(--display);letter-spacing:.02em;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:6px 12px;cursor:pointer}
+.ftabs button span{font:500 11.5px var(--mono);color:var(--muted)}
+.ftabs button[aria-selected="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.ftabs button[aria-selected="true"] span{color:var(--bar-muted)}
+.ftabs button:focus-visible{outline:2px solid var(--accent)}
+#bLines select{font:13px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:4px 6px;max-width:190px}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -432,11 +440,18 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
           <header class="card-h"><span class="code">1</span><h3>Factures déjà payées</h3></header>
           <label class="drop" id="bDrop"><input type="file" id="bFile" accept="image/*,application/pdf" multiple><b>Ajouter des factures</b><span>Photo ou PDF : clique ou glisse ici. Plusieurs fichiers d'un coup, c'est possible.</span></label>
           <div class="actions"><button class="btn" type="button" id="bManual">Saisir une dépense à la main</button></div>
-          <div class="tw"><table><thead><tr><th>Date</th><th>Fournisseur</th><th>Groupe</th><th style="text-align:right">Total TTC</th><th>Aperçu</th><th></th></tr></thead><tbody id="bFact"></tbody></table></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Fournisseur</th><th>Familles</th><th style="text-align:right">Total TTC</th><th>Aperçu</th><th></th></tr></thead><tbody id="bFact"></tbody></table></div>
         </section>
 
         <section class="card">
-          <header class="card-h"><span class="code">2</span><h3>Ce que je veux encore changer</h3></header>
+          <header class="card-h"><span class="code">2</span><h3>Pièces payées par famille</h3></header>
+          <p class="src">Chaque ligne de facture est classée dans sa famille. Clique un onglet pour filtrer ; si une pièce est mal rangée, change sa famille dans la dernière colonne.</p>
+          <div class="ftabs" id="bTabs" role="tablist" aria-label="Familles"></div>
+          <div class="tw"><table><thead><tr><th>Pièce</th><th>Réf.</th><th>Qté</th><th style="text-align:right">Montant TTC</th><th>Facture</th><th>Famille</th></tr></thead><tbody id="bLines"></tbody></table></div>
+        </section>
+
+        <section class="card">
+          <header class="card-h"><span class="code">3</span><h3>Ce que je veux encore changer</h3></header>
           <textarea id="bWish" class="bwish" rows="5" placeholder="Ex. : je veux refaire les freins des 4 roues (tambours, mâchoires, cylindres, flexibles), changer les segments et les joints moteur, remplacer les 2 échangeurs et le silencieux, refaire l'allumage, et mettre 4 pneus neufs."></textarea>
           <div class="actions"><button class="btn pri" type="button" id="bEst">Estimer avec l'IA</button><label class="src" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="bReplace" checked> remplacer l'estimation précédente (garde les postes manuels et faits)</label></div>
           <p class="src" id="bEstMsg" aria-live="polite"></p>
@@ -446,8 +461,8 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
         </section>
 
         <section class="card">
-          <header class="card-h"><span class="code">3</span><h3>Répartition par groupe</h3></header>
-          <div class="tw"><table><thead><tr><th>Groupe</th><th style="text-align:right">Payé</th><th style="text-align:right">Reste estimé</th><th style="width:34%"></th></tr></thead><tbody id="bGroups"></tbody></table></div>
+          <header class="card-h"><span class="code">4</span><h3>Répartition par famille</h3></header>
+          <div class="tw"><table><thead><tr><th>Famille</th><th style="text-align:right">Payé</th><th style="text-align:right">Reste estimé</th><th style="width:34%"></th></tr></thead><tbody id="bGroups"></tbody></table></div>
           <p class="src">Estimations hors frais de port, à partir des prix relevés le 6 novembre 2026. Corrige les fourchettes à la main quand tu as un devis.</p>
         </section>
       </div>
@@ -1235,7 +1250,9 @@ CONTEXTE : ${currentPage()}`;
 /* ---------- budget travaux : factures payées + travaux prévus estimés ---------- */
 const Budget=(()=>{
   const $=id=>document.getElementById(id);
-  const GROUPES=[...Object.values(D.chapters).map(c=>c[0]),'Outillage et consommables','Main-d\'œuvre garage','Divers'];
+  const GROUPES=['Moteur','Alimentation essence et carburation','Allumage','Refroidissement et chauffage','Échappement','Embrayage et boîte de vitesses','Freinage','Direction','Suspension et train avant','Train arrière et transmission','Roues et pneus','Électricité et éclairage','Carrosserie','Vitrage et joints','Sellerie et intérieur','Consommables et outillage','Main-d\'œuvre','Frais de port','Divers'];
+  const famOf=g=>GROUPES.includes(g)?g:'Divers';
+  let famTab='Toutes';
   let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15}, busy={};
   const num=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
   const e0=n=>eur(Math.round(num(n)*100)/100);
@@ -1274,7 +1291,9 @@ const Budget=(()=>{
   }
   function byGroup(){
     const g={};const add=(k,f,v)=>{k=k||'Divers';(g[k]=g[k]||{paye:0,min:0,max:0})[f]+=v};
-    facts.forEach(f=>{const d=f.data||{};if(Array.isArray(d.repartition)&&d.repartition.length)d.repartition.forEach(r=>add(r.groupe,'paye',num(r.montant)));else add(d.groupe,'paye',num(d.total_ttc))});
+    facts.forEach(f=>{const d=f.data||{},L=Array.isArray(d.lignes)?d.lignes:[];
+      if(L.length&&L.some(l=>num(l.prix_ttc))){let sum=0;L.forEach(l=>{const v=num(l.prix_ttc);sum+=v;add(famOf(l.famille||d.groupe),'paye',v)});const rest=num(d.total_ttc)-sum;if(Math.abs(rest)>0.5)add(rest>0?'Divers':'Divers','paye',rest)}
+      else add(famOf(d.groupe),'paye',num(d.total_ttc))});
     plan.postes.filter(p=>!p.fait).forEach(p=>{add(p.groupe,'min',num(p.min));add(p.groupe,'max',num(p.max))});
     return Object.entries(g).sort((a,b)=>(b[1].paye+b[1].max)-(a[1].paye+a[1].max));
   }
@@ -1295,7 +1314,7 @@ const Budget=(()=>{
     $('bFact').innerHTML=busyF+(facts.length?facts.map(f=>{const d=f.data||{};return `<tr data-f="${f.id}">
       <td class="n">${fmtD(d.date)}</td>
       <td><b>${esc(d.fournisseur||f.name||'Facture')}</b>${d.numero?`<small>n° ${esc(d.numero)}</small>`:''}${busy[f.id]?`<small class="busy">${esc(busy[f.id])}</small>`:''}${!f.data&&!busy[f.id]?'<small>Pas encore lue</small>':''}</td>
-      <td>${esc(d.groupe||'—')}</td>
+      <td>${(()=>{const fs=[...new Set((d.lignes||[]).map(l=>famOf(l.famille||d.groupe)))];return fs.length>1?`<span title="${esc(fs.join(', '))}">${fs.length} familles</span><small>${esc(fs.slice(0,3).join(', '))}${fs.length>3?'…':''}</small>`:esc(fs[0]||d.groupe||'—')})()}</td>
       <td class="n" style="text-align:right">${d.total_ttc!=null?e0(d.total_ttc):'—'}</td>
       <td>${f.preview?`<img class="fthumb" src="${imgSrc(f.preview)}" alt="Aperçu de la facture">`:''}</td>
       <td class="fact-act"><button class="btn" type="button" data-fopen="${f.id}">Détail</button></td></tr>
@@ -1312,12 +1331,24 @@ const Budget=(()=>{
     // groupes
     const gs=byGroup(), gmax=Math.max(1,...gs.map(([,v])=>v.paye+v.max));
     $('bGroups').innerHTML=gs.length?gs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n" style="text-align:right">${e0(v.paye)}</td><td class="n" style="text-align:right">${v.max?e0(v.min)+' – '+e0(v.max):'—'}</td><td class="gbar"><span class="paid" style="width:${v.paye/gmax*100}%"></span><span class="est" style="width:${v.max/gmax*100}%"></span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">La répartition apparaîtra avec les premières factures ou la première estimation.</td></tr>';
+    renderFam();
     $('bTaux').closest('label').hidden=$('bMode').value!=='garage';
+  }
+  function allLines(){const out=[];facts.forEach(f=>{const d=f.data||{};(d.lignes||[]).forEach((l,i)=>out.push({f,d,l,i,fam:famOf(l.famille||d.groupe)}))});return out}
+  function renderFam(){
+    const L=allLines(),tot={},cnt={};L.forEach(x=>{tot[x.fam]=(tot[x.fam]||0)+num(x.l.prix_ttc);cnt[x.fam]=(cnt[x.fam]||0)+1});
+    const fams=GROUPES.filter(g=>cnt[g]);if(famTab!=='Toutes'&&!cnt[famTab])famTab='Toutes';
+    const all=L.reduce((a,x)=>a+num(x.l.prix_ttc),0);
+    $('bTabs').innerHTML=L.length?[['Toutes',L.length,all],...fams.map(g=>[g,cnt[g],tot[g]])].map(([g,c,t])=>`<button type="button" role="tab" aria-selected="${g===famTab}" data-tab="${esc(g)}">${esc(g)}<span>${c} · ${e0(t)}</span></button>`).join(''):'';
+    const rows=L.filter(x=>famTab==='Toutes'||x.fam===famTab).sort((a,b)=>a.fam.localeCompare(b.fam)||String(b.d.date||'').localeCompare(String(a.d.date||'')));
+    $('bLines').innerHTML=rows.length?rows.map(x=>{const vw=x.l.ref&&byOem[nz(x.l.ref)]?refLink(x.l.ref):`<span class="mono">${esc(x.l.ref||'')}</span>`;
+      return `<tr><td><b>${esc(x.l.designation||x.l.piece_vw||'')}</b>${x.l.piece_vw&&x.l.piece_vw!==x.l.designation?`<small>${esc(x.l.piece_vw)}</small>`:''}</td><td>${vw}</td><td class="n">${esc(x.l.qte??'')}</td><td class="n" style="text-align:right">${x.l.prix_ttc!=null?e0(x.l.prix_ttc):'—'}</td><td><small>${esc(x.d.fournisseur||'')} · ${fmtD(x.d.date)}</small></td>
+      <td><select data-lf="${x.f.id}:${x.i}" aria-label="Famille">${GROUPES.map(g=>`<option ${g===x.fam?'selected':''}>${esc(g)}</option>`).join('')}</select></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">Les pièces apparaîtront ici dès qu\'une facture sera lue.</td></tr>';
   }
   function refLink(ref){const rs=byOem[nz(ref)]||[];if(!rs.length)return `<span class="mono">${esc(ref)}</span>`;const r=rs[0],w=(where[r]||[])[0];return `<span class="mono">${esc(ref)}</span>${w?` <a href="#a-${w[0]}" data-go="${r}">fiche ↗</a>`:''} ${addBtn(r)}`}
   function factDetail(f){
     const d=f.data||{};
-    const lignes=(d.lignes||[]).map(l=>`<tr><td>${esc(l.designation)}</td><td class="n">${esc(l.ref||'')}</td><td class="n">${esc(l.qte??'')}</td><td class="n" style="text-align:right">${l.prix_ttc!=null?e0(l.prix_ttc):''}</td></tr>`).join('');
+    const lignes=(d.lignes||[]).map(l=>`<tr><td>${esc(l.designation)}<small>${esc(l.famille||'')}</small></td><td class="n">${esc(l.ref||'')}</td><td class="n">${esc(l.qte??'')}</td><td class="n" style="text-align:right">${l.prix_ttc!=null?e0(l.prix_ttc):''}</td></tr>`).join('');
     return `<div class="fdetail">
       ${f.preview?`<a href="${imgSrc(f.preview)}" target="_blank" rel="noopener"><img src="${imgSrc(f.preview)}" alt="Facture"></a>`:''}
       <div class="fform">
@@ -1373,9 +1404,10 @@ const Budget=(()=>{
     }
   }
   const PROMPT_F=`Tu lis une facture ou un ticket de caisse lié à la restauration d'une VW Coccinelle 1302 de 1972. Relève les informations exactement comme elles sont imprimées (n'invente rien ; laisse vide ce qui est illisible).
-Classe la dépense dans un de ces groupes : ${GROUPES.join(' ; ')}. Si la facture mélange plusieurs groupes, donne la répartition.
+Familles possibles (utilise exactement ces noms) : ${GROUPES.join(' ; ')}.
 Réponds uniquement avec un objet JSON :
-{"fournisseur":"","date":"AAAA-MM-JJ","numero":"","total_ttc":0,"groupe":"","type":"pièces|main-d'œuvre|mixte|outillage","lignes":[{"designation":"","ref":"","qte":1,"prix_ttc":0}],"repartition":[{"groupe":"","montant":0}],"remarque":"une phrase si utile"}`;
+{"fournisseur":"","date":"AAAA-MM-JJ","numero":"","total_ttc":0,"groupe":"famille principale de la facture","type":"pièces|main-d'œuvre|mixte|outillage","lignes":[{"designation":"telle qu'imprimée","ref":"référence imprimée","qte":1,"prix_ttc":0,"famille":"","piece_vw":"nom courant de la pièce en français"}],"remarque":"une phrase si utile"}
+Règles pour les lignes : relève TOUTES les lignes payées, y compris main-d'œuvre, consommables, port et remises (montant négatif). prix_ttc = montant TTC de la ligne (quantité comprise) ; si la facture est en HT, ajoute la TVA indiquée. Classe chaque ligne dans la famille qui correspond à la pièce elle-même (ex. cylindre de roue → Freinage, rotule → Direction, amortisseur → Suspension et train avant, joint de culasse → Moteur, bougie → Allumage, aile → Carrosserie, liquide de frein → Freinage, port → Frais de port).`;
   async function readInvoice(f,blobs){
     if(!rt.sample)return;
     busy[f.id]=(local?'Gemini':'Claude')+' lit la facture…';render();
@@ -1385,6 +1417,7 @@ Réponds uniquement avec un objet JSON :
       if(!res||typeof res!=='object')throw{code:'invalid_json'};
       res.total_ttc=res.total_ttc==null?null:num(res.total_ttc);
       if(!GROUPES.includes(res.groupe))res.groupe='Divers';
+      res.lignes=(Array.isArray(res.lignes)?res.lignes:[]).map(l=>({...l,prix_ttc:l.prix_ttc==null?null:num(l.prix_ttc),famille:famOf(l.famille||res.groupe)}));
       await rt.db.collection('factures').doc(f.id).update({data:res,readAt:Date.now()});
       delete busy[f.id];
     }catch(e){
@@ -1450,6 +1483,10 @@ Réponds uniquement avec un objet JSON :
     plan.postes.push({groupe:'Divers',intitule:'Commande « Ma liste de pièces »',pieces,min:Math.round(tot),max:Math.round(tot*1.1),fait:false,manuel:true,commentaire:'au meilleur prix relevé, +10 % en haut de fourchette'});
     savePlan();render();$('bEstMsg').textContent='Ta liste a été ajoutée comme poste.';
   });
+  $('bTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b){famTab=b.dataset.tab;renderFam()}});
+  $('bLines').addEventListener('change',async e=>{const t=e.target.closest('[data-lf]');if(!t)return;const [fid,i]=t.dataset.lf.split(':');const f=facts.find(x=>x.id===fid);if(!f||!f.data)return;
+    const d={...f.data,lignes:f.data.lignes.map((l,k)=>k===+i?{...l,famille:t.value}:l)};await rt.db.collection('factures').doc(fid).update({data:d})});
+  $('bLines').addEventListener('click',e=>{const go=e.target.closest('a[data-go]');if(go)pendingRef=go.dataset.go});
   $('bPlan').addEventListener('change',e=>{const t=e.target;
     if(t.dataset.fait!=null){plan.postes[+t.dataset.fait].fait=t.checked}
     else if(t.dataset.min!=null){plan.postes[+t.dataset.min].min=num(t.value)}
@@ -1460,7 +1497,7 @@ Réponds uniquement avec un objet JSON :
   $('bFact').addEventListener('click',async e=>{
     const o=e.target.closest('[data-fopen]');if(o){const r=document.querySelector(`[data-fd="${o.dataset.fopen}"]`);r.hidden=!r.hidden;return}
     const sv=e.target.closest('[data-fsave]');if(sv){const id=sv.dataset.fsave,f=facts.find(x=>x.id===id),box=sv.closest('.fform');const d={...(f.data||{})};
-      box.querySelectorAll('[data-k]').forEach(i=>{d[i.dataset.k]=i.dataset.k==='total_ttc'?num(i.value):i.value});d.repartition=[];
+      box.querySelectorAll('[data-k]').forEach(i=>{d[i.dataset.k]=i.dataset.k==='total_ttc'?num(i.value):i.value});
       await rt.db.collection('factures').doc(id).update({data:d});return}
     const rd=e.target.closest('[data-fread]');if(rd){const f=facts.find(x=>x.id===rd.dataset.fread);if(f)readInvoice(f);return}
     const dl=e.target.closest('[data-fdel]');if(dl){if(!dl.dataset.c){dl.dataset.c=1;dl.textContent='Confirmer la suppression';return}
