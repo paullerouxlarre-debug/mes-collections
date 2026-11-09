@@ -385,6 +385,12 @@ td:has(> .fdetail){background:var(--paper);padding:16px 18px}
 .prow [data-pm]{width:150px!important}
 .payf .actions{flex-wrap:wrap}
 .fform > .actions{justify-content:flex-start;border-top:1px solid var(--line2);padding-top:12px}
+
+#rTiers tr.cible td{background:var(--ok-soft)}
+#rTiers tr.auj td:first-child b{color:var(--accent)}
+.rdet summary{cursor:pointer;color:var(--note);font-weight:500}
+.rdet{display:flex;flex-direction:column;gap:10px}
+.rdet[open] > *{margin-top:10px}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -493,6 +499,20 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
             <label>Taux horaire (€/h)<input id="bTaux" type="number" min="0" step="5"></label>
             <label>Marge imprévus (%)<input id="bMarge" type="number" min="0" max="100" step="5"></label>
           </div>
+        </section>
+
+        <section class="card">
+          <header class="card-h"><span class="code">€</span><h3>Valeur de revente de ma 1302</h3></header>
+          <p class="src">Fourchettes tirées de 22 annonces et ventes de berlines 1302 (1970-1972) en France et en Allemagne, chez des particuliers, des professionnels et aux enchères, recoupées avec trois cotes. Relevé du <span class="n" id="rDate"></span>. Ce sont surtout des prix demandés : la vente se conclut souvent 5 à 15 % plus bas.</p>
+          <div class="tools bset"><label>Prix d'achat de ma voiture (€)<input id="rAchat" type="number" min="0" step="100" placeholder="ex. 3000"></label><label>État visé après travaux<select id="rCible" style="width:260px"></select></label></div>
+          <div class="bkpi" id="rKpi"></div>
+          <div class="tw"><table><thead><tr><th>État</th><th style="text-align:right">Fourchette</th><th style="text-align:right">Médiane</th><th></th></tr></thead><tbody id="rTiers"></tbody></table></div>
+          <details class="rdet"><summary>Voir les 22 annonces et ventes comparées</summary>
+            <div class="tw"><table><thead><tr><th>Voiture</th><th>État</th><th>Vendeur</th><th>Pays</th><th style="text-align:right">Prix</th><th></th></tr></thead><tbody id="rComps"></tbody></table></div>
+            <p class="src" id="rCab"></p>
+            <ul class="points" id="rSrc"></ul>
+          </details>
+          <p class="src">Ce qui fait monter le prix : factures et photos de la restauration, numéros de châssis et moteur d'origine (« matching numbers »), couleur d'origine, carte grise collection, absence de rouille dans les bas de caisse. Une 1302 berline vaut sensiblement moins qu'un cabriolet ou qu'une Coccinelle d'avant 1967.</p>
         </section>
 
         <section class="card">
@@ -1310,6 +1330,51 @@ CONTEXTE : ${currentPage()}`;
   return {open};
 })();
 
+/* ---------- valeur de revente : relevé du marché 1302 (9 novembre 2026) ---------- */
+const MARKET={date:'9 novembre 2026',
+  tiers:[
+    {id:'restaurer',nom:'À restaurer / non roulante',desc:'Moteur déposé ou hors service, rouille à traiter, pas de contrôle technique.',min:1500,med:3500,max:5000},
+    {id:'jus',nom:'Roulante, dans son jus',desc:'Roule, CT possible, usure et petite rouille visibles, mécanique d\'origine.',min:8000,med:10500,max:12500},
+    {id:'bon',nom:'Bon état, mécanique refaite',desc:'Moteur et freins refaits, carrosserie saine, présentation correcte.',min:12000,med:14000,max:16500},
+    {id:'restauree',nom:'Restaurée, conforme d\'origine',desc:'Restauration complète et documentée (factures, photos), peinture et sellerie refaites.',min:16000,med:18500,max:22000}
+  ],
+  // annonces et ventes relevées (berlines 1302, 1970-1972) : prix demandé sauf mention « vendue »
+  comps:[
+    ['Allemagne','particulier','à restaurer','Projet, 1970',2700,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['Allemagne','particulier','à restaurer','Projet, 1971',3850,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['France','professionnel','à restaurer','Accidentée, 1972',4200,'https://www.leboncoin.fr/ck/voitures/coccinelle-1302'],
+    ['France','enchères','à restaurer','Vendue (Artcurial), stockée dehors, 1972',1500,'https://www.theclassicvaluer.com/vehicle-details/artcurial-2020-09-13-volkswagen-beetle-1302-93cff2'],
+    ['France','particulier','dans son jus','1971',4990,'https://www.lesanciennes.com/annonce/volkswagen-coccinelle-1302-1971-a876612'],
+    ['Allemagne','particulier','projet avancé','1970',9500,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['Allemagne','particulier','dans son jus','1970, entretenue',10990,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['France','particulier','dans son jus','1302 L, 1971',11000,'https://www.classicnumber.com/volkswagen-coccinelle-1302-cabriolet-collection-a-vendre-145478.html'],
+    ['Allemagne','professionnel','bon état','1972',11200,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['Allemagne','particulier','bon état','1302 S, 1971, CT neuf',11500,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['France','particulier','mécanique refaite','1969',11900,'https://www.leboncoin.fr/ck/voitures/coccinelle-1302'],
+    ['Allemagne','professionnel','bon état','1972',11900,'https://www.autoscout24.de/lst/volkswagen/kaefer/ve_1302'],
+    ['Allemagne','particulier','bon état','1971',11900,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['France','professionnel','bon état','1302 S, 1971',12990,'https://www.facebook.com/100064772316905/posts/1570816305087432/'],
+    ['Allemagne','particulier','bon état','Semi-automatique, 1971',15500,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['Allemagne','particulier','bon état','1972',16272,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['Allemagne','particulier','très bon état','1970, première main',17500,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['Allemagne','particulier','très bon état','1971',18000,'https://www.autoscout24.de/lst/volkswagen/kaefer/ve_1302'],
+    ['Allemagne','particulier','très bon état','1302 LS, 1972',18900,'https://www.autoscout24.de/lst/volkswagen/kaefer/ve_1302'],
+    ['France','professionnel','restaurée','1972',19000,'https://www.classic-trader.com/fr/voitures/annonce/volkswagen/coccinelle/coccinelle-1302/1972/422168'],
+    ['Allemagne','particulier','restaurée','1302 LS, 1971',19900,'https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine'],
+    ['France','professionnel','restaurée','1972',23900,'https://www.classic-trader.com/fr/voitures/annonce/volkswagen/coccinelle/coccinelle-1302/1972/196672']
+  ],
+  cabrio:'Pour comparaison, les 1302 cabriolet Karmann se négocient nettement plus cher : 12 000 à 30 000 € (la plupart entre 15 000 et 25 000 €).',
+  sources:[
+    ['Cote Classic Doctor (1302/1303, France 2026)','https://classicdoctor.fr/cote-volkswagen-coccinelle/','12 000 € en moyenne, fourchette 9 000 – 16 000 €'],
+    ['mobile.de (Allemagne, nov. 2026)','https://suchen.mobile.de/auto/volkswagen-kaefer-1302.html','« bon prix » entre 15 249 et 22 974 € (toutes 1302, cabriolets compris)'],
+    ['The Classic Valuer (enchères depuis 2020)','https://www.theclassicvaluer.com/vehicle-details/artcurial-2020-09-13-volkswagen-beetle-1302-93cff2','vendues de 1 300 £ à 22 250 £, médiane 7 425 £'],
+    ['AutoScout24 Allemagne','https://www.autoscout24.de/lst/volkswagen/kaefer/ve_1302','annonces 1302'],
+    ['Kleinanzeigen (berlines 1302)','https://www.kleinanzeigen.de/s-autos/k%C3%A4fer-1302/k0c216+autos.typ_s:limousine','annonces de particuliers et pros'],
+    ['leboncoin (Coccinelle 1302)','https://www.leboncoin.fr/ck/voitures/coccinelle-1302','annonces France'],
+    ['lesAnciennes / Classic Trader / Classic Number','https://www.lesanciennes.com/annonces/voiture-collection/vw-coccinelle/','annonces collection France']
+  ]
+};
+
 /* ---------- budget travaux : factures payées + travaux prévus estimés ---------- */
 const Budget=(()=>{
   const $=id=>document.getElementById(id);
@@ -1317,7 +1382,7 @@ const Budget=(()=>{
   const famOf=g=>GROUPES.includes(g)?g:'Divers';
   let famTab='Toutes';
   const subs=[];
-  let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15,payeurs:['Paul']}, busy={};
+  let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15,payeurs:['Paul'],achat:0,cible:'bon'}, busy={};
   const num=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
   const e0=n=>eur(Math.round(num(n)*100)/100);
   const fmtD=s=>{if(!s)return '—';const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})};
@@ -1336,9 +1401,10 @@ const Budget=(()=>{
     local=rt.local;
     $('bState').innerHTML=local?'<p class="info"><b>Mode Gemini</b>Budget et factures gardés dans le navigateur de cet appareil. <a href="#" data-ai-settings>Réglages IA</a></p>':'';
     $('bApp').hidden=false;
+    $('rDate').textContent=MARKET.date;$('rCab').textContent=MARKET.cabrio;$('rSrc').innerHTML=MARKET.sources.map(x=>`<li><div><a href="${esc(x[1])}" target="_blank" rel="noopener">${esc(x[0])} ↗</a> — ${esc(x[2])}</div></li>`).join('');
     try{const r=await rt.db.doc('budget/reglages').get();const d=r.data();if(d)regl={...regl,...d}}catch(e){}
     try{const p=await rt.db.doc('budget/plan').get();const d=p.data();if(d&&Array.isArray(d.postes))plan=d}catch(e){}
-    $('bMax').value=regl.max||'';$('bMode').value=regl.mode;$('bTaux').value=regl.taux;$('bMarge').value=regl.marge;
+    $('bMax').value=regl.max||'';$('rAchat').value=regl.achat||'';$('rCible').innerHTML=MARKET.tiers.slice(1).map(x=>`<option value="${x.id}" ${x.id===regl.cible?'selected':''}>${esc(x.nom)}</option>`).join('');$('bMode').value=regl.mode;$('bTaux').value=regl.taux;$('bMarge').value=regl.marge;
     rt.db.collection('factures').orderBy('createdAt','desc').onSnapshot(async s=>{facts=s.docs.map(d=>({id:d.id,...d.data()}));if(local)await Local.preload(facts.map(f=>f.preview).filter(Boolean));render();subs.forEach(fn=>{try{fn()}catch(e){}})},err=>{$('bState').innerHTML='<p class="warn"><b>Erreur</b>'+esc(err.message||err.code)+'</p>'});
     render();
   }
@@ -1396,7 +1462,7 @@ const Budget=(()=>{
     // groupes
     const gs=byGroup(), gmax=Math.max(1,...gs.map(([,v])=>v.paye+v.max));
     $('bGroups').innerHTML=gs.length?gs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n" style="text-align:right">${e0(v.paye)}</td><td class="n" style="text-align:right">${v.max?e0(v.min)+' – '+e0(v.max):'—'}</td><td class="gbar"><span class="paid" style="width:${v.paye/gmax*100}%"></span><span class="est" style="width:${v.max/gmax*100}%"></span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">La répartition apparaîtra avec les premières factures ou la première estimation.</td></tr>';
-    renderFam();renderPay();
+    renderFam();renderPay();renderResale(t);
     $('bTaux').closest('label').hidden=$('bMode').value!=='garage';
   }
   /* ----- payeurs ----- */
@@ -1446,6 +1512,18 @@ const Budget=(()=>{
       let i=0,j=0;while(i<de.length&&j<cr.length){const m=Math.min(-de[i].d,cr[j].d);tr.push(`${esc(de[i].n)} doit ${e0(m)} à ${esc(cr[j].n)}`);de[i].d+=m;cr[j].d-=m;if(-de[i].d<0.01)i++;if(cr[j].d<0.01)j++}
       h+=`<h4 class="ptitle">Si vous partagez à parts égales</h4><p class="src">Part de chacun : ${e0(avg)}.</p>`+(tr.length?`<ul class="points">${tr.map(t=>`<li><div>${t}</div></li>`).join('')}</ul>`:'<p class="src">Tout le monde est à égalité.</p>');}
     $('pStats').innerHTML=h;
+  }
+  function renderResale(t){
+    const tiers=MARKET.tiers,cible=tiers.find(x=>x.id===regl.cible)||tiers[2],achat=num(regl.achat);
+    const invMin=achat+t.paye+t.min,invMax=achat+t.paye+t.max;
+    const gainMin=cible.min-invMax,gainMax=cible.max-invMin,gainMed=cible.med-(invMin+invMax)/2;
+    $('rTiers').innerHTML=tiers.map(x=>`<tr class="${x.id===cible.id?'cible':''}${x.id==='restaurer'?' auj':''}"><td><b>${esc(x.nom)}</b><small>${esc(x.desc)}</small></td><td class="n" style="text-align:right">${e0(x.min)} – ${e0(x.max)}</td><td class="n" style="text-align:right"><b>${e0(x.med)}</b></td><td>${x.id==='restaurer'?'<span class="tag cab">aujourd\'hui</span>':''}${x.id===cible.id?'<span class="tag ok">visé</span>':''}</td></tr>`).join('');
+    const cls=gainMax<0?'bad':gainMin<0?'warnk':'okk';
+    $('rKpi').innerHTML=`<div><span>Valeur aujourd'hui (à restaurer)</span><b>${e0(tiers[0].min)} – ${e0(tiers[0].max)}</b><em>moteur déposé, travaux en cours</em></div>
+      <div><span>Valeur après travaux</span><b>${e0(cible.min)} – ${e0(cible.max)}</b><em>${esc(cible.nom)} · médiane ${e0(cible.med)}</em></div>
+      <div><span>Investissement total</span><b>${e0(invMin)} – ${e0(invMax)}</b><em>achat ${achat?e0(achat):'non renseigné'} + payé + reste à faire</em></div>
+      <div class="${cls}"><span>Bilan à la revente</span><b>${gainMed>=0?'+':'−'}${e0(Math.abs(gainMed))}</b><em>${gainMax<0?'moins-value probable':gainMin<0?'entre '+e0(gainMin)+' et +'+e0(gainMax):'plus-value probable : +'+e0(gainMin)+' à +'+e0(gainMax)}</em></div>`;
+    $('rComps').innerHTML=MARKET.comps.slice().sort((a,b)=>a[4]-b[4]).map(c=>`<tr><td>${esc(c[3])}</td><td>${esc(c[2])}</td><td>${esc(c[1])}</td><td>${esc(c[0])}</td><td class="n" style="text-align:right">${e0(c[4])}</td><td><a href="${esc(c[5])}" target="_blank" rel="noopener">source ↗</a></td></tr>`).join('');
   }
   function allLines(){const out=[];facts.forEach(f=>{const d=f.data||{};(d.lignes||[]).forEach((l,i)=>out.push({f,d,l,i,fam:famOf(l.famille||d.groupe)}))});return out}
   function renderFam(){
@@ -1593,6 +1671,8 @@ Réponds uniquement avec un objet JSON :
   $('bTaux').addEventListener('change',()=>{regl.taux=num($('bTaux').value)||60;saveRegl();render()});
   $('bMarge').addEventListener('change',()=>{regl.marge=Math.max(0,num($('bMarge').value));saveRegl();render()});
   $('bEst').addEventListener('click',estimate);
+  $('rAchat').addEventListener('change',()=>{regl.achat=num($('rAchat').value);saveRegl();render()});
+  $('rCible').addEventListener('change',()=>{regl.cible=$('rCible').value;saveRegl();render()});
   $('bManual').addEventListener('click',async()=>{const ref=rt.db.collection('factures').doc();await ref.set({name:'Saisie manuelle',createdAt:Date.now(),data:{fournisseur:'',date:new Date().toISOString().slice(0,10),total_ttc:0,groupe:'Divers',lignes:[]}});setTimeout(()=>{const b=document.querySelector(`[data-fopen="${ref.id}"]`);if(b)b.click()},300)});
   $('bAddPoste').addEventListener('click',()=>{plan.postes.push({groupe:'Divers',intitule:'Nouveau poste',min:0,max:0,fait:false,manuel:true,pieces:[]});savePlan();render();const ins=document.querySelectorAll('[data-min]');ins[ins.length-1]?.focus()});
   $('bImport').addEventListener('click',()=>{
@@ -1646,7 +1726,7 @@ Réponds uniquement avec un objet JSON :
       const f=facts.find(x=>x.id===dl.dataset.fdel);await rt.db.collection('factures').doc(f.id).delete();for(const id of new Set([f.asset,...(f.pages||[])]))if(id)rt.assets.delete(id).catch(()=>{});return}
     const im=e.target.closest('img.fthumb');if(im){const lb=document.createElement('div');lb.className='lb';lb.innerHTML=`<img src="${im.src}" alt="Facture">`;lb.addEventListener('click',()=>lb.remove());document.body.appendChild(lb)}
   });
-  const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,payeurs:Object.fromEntries(Object.entries(payStats().by).map(([n,v])=>[n,Math.round(v.tot)])),postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
+  const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,valeur_revente_visee:(()=>{const c=MARKET.tiers.find(x=>x.id===regl.cible)||MARKET.tiers[2];return{etat:c.nom,fourchette:[c.min,c.max],mediane:c.med,releve:MARKET.date}})(),prix_achat:num(regl.achat)||null,payeurs:Object.fromEntries(Object.entries(payStats().by).map(([n,v])=>[n,Math.round(v.tot)])),postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
   return {open,summary:async()=>{if(!started)await open();return summary()},lines:()=>allLines(),onChange:fn=>subs.push(fn),ready:()=>started&&!!rt,rt:()=>rt};
 })();
 
