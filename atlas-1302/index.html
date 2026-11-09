@@ -391,6 +391,20 @@ td:has(> .fdetail){background:var(--paper);padding:16px 18px}
 .rdet summary{cursor:pointer;color:var(--note);font-weight:500}
 .rdet{display:flex;flex-direction:column;gap:10px}
 .rdet[open] > *{margin-top:10px}
+
+.xzones{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 16px;font-size:13.5px;color:var(--muted)}
+.xzones li.ok{color:var(--ok);font-weight:500}
+.xscale{position:relative;height:96px;margin:10px 0 4px;background:var(--paper);border:1px solid var(--line);border-radius:4px}
+.xt{position:absolute;top:8px;height:30px;background:var(--line2);border-left:2px solid var(--sheet);display:flex;align-items:center;overflow:hidden}
+.xt span{font:500 11px var(--body);color:var(--muted);padding:0 6px;white-space:nowrap}
+.xc{position:absolute;top:44px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--note);opacity:.7}
+.xme{position:absolute;height:10px;border-radius:5px}
+.xme.now{top:58px;background:var(--accent)}
+.xme.after{top:58px;background:var(--ok);opacity:.85}
+.xax{position:absolute;left:0;right:0;bottom:2px;height:14px}
+.xax span{position:absolute;transform:translateX(-50%);font:10.5px var(--mono);color:var(--muted)}
+#xOut section{display:flex;flex-direction:column;gap:8px}
+.xpf section{min-width:0}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -444,6 +458,7 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
           <a href="#fiche-f4"><b>Fiche F4 · Changer les freins</b><span>Roue par roue, puis purge (F5)</span></a>
           <a href="#a-pistons"><b>Pistons et segments</b><span>Segments 77 mm, fiche P4</span></a>
           <a href="#a-distributor"><b>Allumeur</b><span>113 905 205 K : rupteur, condensateur, tête, rotor</span></a>
+          <a href="#expertise"><b>Expertise IA</b><span>Note, valeur face au marché et chantier estimés depuis tes photos</span></a>
           <a href="#commandes"><b>Pièces commandées</b><span>Toutes les pièces de tes factures, par famille, avec leur statut</span></a>
           <a href="#budget"><b>Budget travaux</b><span>Factures payées, travaux estimés, budget max</span></a>
           <a href="#photos"><b>Mes photos et analyses</b><span>Dépose une photo : identification, état, pièces à changer</span></a>
@@ -467,6 +482,23 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
       </section>
       <section class="card" id="bilan" hidden></section>
       <div id="photoBox" class="pgrid"></div>
+    </div>
+
+    <div class="page" data-page="expertise" hidden>
+      <div class="phead"><span class="kicker">Expertise</span><h1>Expertise IA de ma 1302</h1>
+        <p class="lead">À partir de tes photos, l'IA joue l'expert : note l'état zone par zone, estime la valeur de ta voiture aujourd'hui et après travaux, la situe face aux 22 annonces du marché, et chiffre le chantier restant, que tu peux envoyer dans ton budget en un clic.</p></div>
+      <div id="xState"></div>
+      <div id="xApp" hidden style="display:flex;flex-direction:column;gap:18px">
+        <section class="card">
+          <header class="card-h"><span class="code">1</span><h3>Tes photos</h3></header>
+          <p id="xPhotos"></p>
+          <p class="src">Zones à photographier pour une expertise complète (✓ = zone indiquée sur au moins une photo) :</p>
+          <ul class="xzones" id="xZones"></ul>
+          <div class="actions"><a class="btn" href="#photos">Ajouter des photos</a><button class="btn pri" type="button" id="xRun">Lancer l'expertise complète</button><span class="src" id="xRunMsg" aria-live="polite"></span></div>
+          <p class="src">L'expertise relit toutes les analyses de tes photos et regarde à nouveau jusqu'à 4 photos de zones différentes. Compte 1 à 3 minutes.</p>
+        </section>
+        <section class="card" id="xOut"></section>
+      </div>
     </div>
 
     <div class="page" data-page="commandes" hidden>
@@ -760,6 +792,7 @@ let h='<div class="sec">Atelier</div>'+
   '<a class="it" href="#couples"><span class="n">Nm</span>Couples de serrage</a>'+
   '<a class="it" href="#fiche"><span class="n">i</span>Fiche technique</a>'+
   '<a class="it" href="#liste"><span class="n">+</span>Ma liste de pièces</a>'+
+  '<a class="it" href="#expertise"><span class="n">★</span>Expertise IA de ma voiture</a>'+
   '<a class="it" href="#commandes"><span class="n">✓</span>Pièces commandées (factures)</a>'+
   '<a class="it" href="#budget"><span class="n">€</span>Budget travaux et factures</a>'+
   (window.claude&&window.claude.use?'':'<a class="it" href="#" data-ai-settings><span class="n">⚙</span>Réglages IA (clé Gemini)</a>')+
@@ -882,7 +915,7 @@ function show(){
   const hh=decodeURIComponent(location.hash.slice(1))||'accueil';
   let page=pages.find(p=>p.dataset.page===hh&&p!==dyn), cur=hh, ch=null;
   pages.forEach(p=>p.hidden=true);
-  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget')Budget.open();if(hh==='commandes')Orders.open()}
+  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget')Budget.open();if(hh==='commandes')Orders.open();if(hh==='expertise')Expert.open()}
   else{
     let html='';
     if(hh.startsWith('a-')&&byId[hh.slice(2)]){const v=byId[hh.slice(2)];html=pageView(v);ch=v.ch}
@@ -1278,6 +1311,7 @@ CONTEXTE : ${currentPage()}`;
       execute:({code})=>{const p=D.procs.find(x=>x.k.toLowerCase()===String(code||'').toLowerCase().trim());if(!p)throw new Error('Fiche inconnue. Codes : '+D.procs.map(x=>x.k).join(', '));return p.k+' — '+p.t+'\n'+strip(p.html).slice(0,9000)}},
     {name:'mes_photos',description:"Renvoie le résumé des analyses des photos que Paul a déposées dans l'atlas (zone, note d'état, pièces à changer).",
       execute:async()=>{if(!db)return [];const s=await db.collection('photos').get();return s.docs.map(d=>d.data()).filter(x=>x.analysis).slice(0,15).map(x=>({zone:x.zone||'',date:new Date(x.createdAt).toLocaleDateString('fr-FR'),note:x.note||'',vue:x.analysis.vue,etat:x.analysis.note_etat,resume:x.analysis.resume,a_changer:(x.analysis.a_changer||[]).map(a=>a.piece+(a.ref_vw?' ('+a.ref_vw+')':'')+' : '+a.priorite)}))}},
+    {name:'mon_expertise',description:"Renvoie la dernière expertise IA de la voiture (note, valeur, comparaison au marché, chantier).",execute:()=>Expert.last()||'Pas encore d\'expertise.'},
     {name:'mon_budget',description:"Renvoie le budget travaux de Paul : budget max, déjà payé (factures), reste à faire estimé, postes prévus.",
       execute:()=>Budget.summary()},
     {name:'ajouter_a_ma_liste',description:"Ajoute une pièce à la liste de commande de Paul, par sa référence VW (confirmée avec chercher_pieces). À utiliser seulement si Paul le demande.",
@@ -1727,7 +1761,8 @@ Réponds uniquement avec un objet JSON :
     const im=e.target.closest('img.fthumb');if(im){const lb=document.createElement('div');lb.className='lb';lb.innerHTML=`<img src="${im.src}" alt="Facture">`;lb.addEventListener('click',()=>lb.remove());document.body.appendChild(lb)}
   });
   const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,valeur_revente_visee:(()=>{const c=MARKET.tiers.find(x=>x.id===regl.cible)||MARKET.tiers[2];return{etat:c.nom,fourchette:[c.min,c.max],mediane:c.med,releve:MARKET.date}})(),prix_achat:num(regl.achat)||null,payeurs:Object.fromEntries(Object.entries(payStats().by).map(([n,v])=>[n,Math.round(v.tot)])),postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
-  return {open,summary:async()=>{if(!started)await open();return summary()},lines:()=>allLines(),onChange:fn=>subs.push(fn),ready:()=>started&&!!rt,rt:()=>rt};
+  async function addPostes(ps){plan.postes.push(...ps.map(p=>({groupe:p.groupe||'Divers',intitule:p.intitule||'Poste',min:num(p.min),max:Math.max(num(p.max),num(p.min)),fait:false,manuel:true,commentaire:p.commentaire||'',pieces:p.pieces||[],source:p.source||''})));await savePlan();render()}
+  return {open,addPostes,summary:async()=>{if(!started)await open();return summary()},lines:()=>allLines(),onChange:fn=>subs.push(fn),ready:()=>started&&!!rt,rt:()=>rt};
 })();
 
 /* ---------- pièces commandées : tout ce qui figure sur les factures ---------- */
@@ -1794,6 +1829,96 @@ const Orders=(()=>{
   return {open,refresh,tag,has:r=>!!cat[r]};
 })();
 Budget.onChange(()=>Orders.refresh());
+/* ---------- expertise IA : état, valeur, comparaison au marché et chantier à partir des photos ---------- */
+const Expert=(()=>{
+  const $=id=>document.getElementById(id);
+  const n0=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+  const e0=n=>eur(Math.round(n0(n)));
+  const ZONES=['Vue d\'ensemble avant','Vue d\'ensemble arrière','Côté gauche','Côté droit','Bas de caisse et dessous','Passages de roue','Compartiment moteur','Moteur (détails)','Coffre avant et tête de châssis','Freins / roues','Intérieur et sellerie','Tableau de bord','Plaque constructeur / numéro de châssis'];
+  let rt=null, exp=null, photos=[], busy=false;
+  async function open(){
+    if(!Budget.ready())await Budget.open();
+    rt=Budget.rt&&Budget.rt();
+    if(!rt){$('xState').innerHTML=(window.claude&&window.claude.use)?'<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude.</p>':'<p class="warn"><b>Clé Gemini à coller</b>L\'expertise utilise Gemini avec ta clé gratuite sur cette version. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';$('xApp').hidden=true;return}
+    $('xState').innerHTML='';$('xApp').hidden=false;
+    try{const s=await rt.db.collection('photos').get();photos=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))}catch(e){photos=[]}
+    try{const r=await rt.db.doc('expertise/derniere').get();exp=r.data()||null}catch(e){}
+    render();
+  }
+  function coverage(){const z={};photos.forEach(p=>{if(p.zone)z[p.zone]=(z[p.zone]||0)+1});return z}
+  function render(){
+    const an=photos.filter(p=>p.analysis).length;
+    $('xPhotos').innerHTML=`<b>${photos.length}</b> photo${photos.length>1?'s':''} dans « Mes photos », dont <b>${an}</b> déjà analysée${an>1?'s':''}. ${photos.length<6?'<span class="busy">Pour une expertise fiable, ajoute au moins 6 à 10 photos couvrant les zones ci-dessous.</span>':''}`;
+    const cov=coverage(),zonesPhotos=Object.keys(cov).join(' ').toLowerCase();
+    $('xZones').innerHTML=ZONES.map(z=>{const w=z.toLowerCase().split(/[ /()']+/).filter(x=>x.length>4);const ok=w.some(x=>zonesPhotos.includes(x));return `<li class="${ok?'ok':''}">${ok?'✓':'○'} ${esc(z)}</li>`}).join('');
+    $('xRun').disabled=busy||!photos.length;
+    if(!exp){$('xOut').innerHTML='<p class="src">Pas encore d\'expertise. Ajoute tes photos dans <a href="#photos">Mes photos</a>, puis lance l\'expertise.</p>';return}
+    const E=exp.r||{}, T=MARKET.tiers, now=E.valeur&&E.valeur.aujourdhui||[], after=E.valeur&&E.valeur.apres_travaux||[];
+    const L=Array.isArray, max=24000, pct=v=>Math.max(0,Math.min(100,n0(v)/max*100));
+    const scale=`<div class="xscale">${T.map(t=>`<div class="xt" style="left:${pct(t.min)}%;width:${pct(t.max)-pct(t.min)}%"><span>${esc(t.nom)}</span></div>`).join('')}
+      ${MARKET.comps.map(c=>`<i class="xc" style="left:${pct(c[4])}%" title="${esc(c[3]+' · '+c[2]+' · '+e0(c[4]))}"></i>`).join('')}
+      ${now.length===2?`<b class="xme now" style="left:${pct(now[0])}%;width:${Math.max(1,pct(now[1])-pct(now[0]))}%" title="Ta voiture aujourd'hui"></b>`:''}
+      ${after.length===2?`<b class="xme after" style="left:${pct(after[0])}%;width:${Math.max(1,pct(after[1])-pct(after[0]))}%" title="Ta voiture après travaux"></b>`:''}
+      <div class="xax">${[0,5000,10000,15000,20000].map(v=>`<span style="left:${pct(v)}%">${v/1000} k€</span>`).join('')}</div></div>`;
+    const ch=E.chantier||{}, posts=L(ch.postes)?ch.postes:[], tmin=posts.reduce((a,p)=>a+n0(p.min),0), tmax=posts.reduce((a,p)=>a+n0(p.max),0);
+    $('xOut').innerHTML=`
+      <p class="src">Expertise du ${new Date(exp.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})} · ${exp.nbPhotos} photos examinées · ${esc(exp.ia||'')}</p>
+      <div class="bkpi">
+        <div class="${n0(E.note)>=6?'okk':n0(E.note)>=4?'warnk':'bad'}"><span>Note globale</span><b>${esc(E.note??'?')}/10</b><em>${esc((T.find(t=>t.id===E.niveau)||{}).nom||'')}</em></div>
+        <div><span>Valeur aujourd'hui</span><b>${now.length?e0(now[0])+' – '+e0(now[1]):'—'}</b><em>dans l'état des photos</em></div>
+        <div><span>Valeur après travaux</span><b>${after.length?e0(after[0])+' – '+e0(after[1]):'—'}</b><em>${esc(E.valeur&&E.valeur.etat_vise||'')}</em></div>
+        <div><span>Chantier estimé</span><b>${e0(tmin)} – ${e0(tmax)}</b><em>${esc(ch.duree||'')}${ch.difficulte?' · '+esc(ch.difficulte):''}</em></div>
+      </div>
+      <p class="lead" style="max-width:none">${esc(E.resume||'')}</p>
+      <section><h4 class="ptitle">Ta 1302 face au marché</h4>${scale}
+        <p class="src"><i class="xc" style="position:static;display:inline-block"></i> annonce comparée · <b class="xme now" style="position:static;display:inline-block;width:18px"></b> ta voiture aujourd'hui · <b class="xme after" style="position:static;display:inline-block;width:18px"></b> après travaux</p>
+        <p>${esc(E.valeur&&E.valeur.comparaison||'')}</p></section>
+      ${L(E.zones)&&E.zones.length?`<section><h4 class="ptitle">État zone par zone</h4><div class="tw"><table><thead><tr><th>Zone</th><th>Note</th><th>Constat</th></tr></thead><tbody>${E.zones.map(z=>`<tr><td><b>${esc(z.zone)}</b></td><td class="n"><span class="score s${Math.max(1,Math.min(5,Math.round(n0(z.note)/2)))}" style="font-size:15px;padding:3px 7px">${esc(z.note)}/10</span></td><td>${esc(z.constat||'')}${z.vu===false?'<small>non visible sur les photos</small>':''}</td></tr>`).join('')}</tbody></table></div></section>`:''}
+      <div class="two xpf"><section><h4 class="ptitle">Points forts</h4><ul class="points">${(E.points_forts||[]).map(x=>`<li><div>${esc(x)}</div></li>`).join('')}</ul></section><section><h4 class="ptitle">Points faibles</h4><ul class="points">${(E.points_faibles||[]).map(x=>`<li><div>${esc(x)}</div></li>`).join('')}</ul></section></div>
+      ${posts.length?`<section><h4 class="ptitle">Chantier à prévoir</h4><div class="tw"><table><thead><tr><th>Priorité</th><th>Poste</th><th style="text-align:right">Fourchette</th></tr></thead><tbody>${posts.map(p=>`<tr><td><span class="g ${{urgent:'g-urg','à prévoir':'g-prev',optionnel:'g-surv'}[p.priorite]||''}">${esc(p.priorite||'')}</span></td><td><b>${esc(p.intitule)}</b><small>${esc(p.groupe||'')}${p.commentaire?' · '+esc(p.commentaire):''}</small></td><td class="n" style="text-align:right">${e0(p.min)} – ${e0(p.max)}</td></tr>`).join('')}</tbody></table></div>
+        <div class="actions"><button class="btn pri" type="button" id="xToBudget">Envoyer ce chantier dans mon budget</button><span class="src" id="xMsg"></span></div></section>`:''}
+      ${L(E.conseils)&&E.conseils.length?`<section><h4 class="ptitle">Conseils de l'expert</h4><ul class="points">${E.conseils.map(x=>`<li><div>${esc(x)}</div></li>`).join('')}</ul></section>`:''}
+      ${L(E.photos_manquantes)&&E.photos_manquantes.length?`<p class="info"><b>Pour affiner</b>Photos à ajouter : ${E.photos_manquantes.map(esc).join(' ; ')}.</p>`:''}`;
+    const tb=$('xToBudget');if(tb)tb.onclick=async()=>{await Budget.addPostes(posts.map(p=>({...p,source:'expertise'})));$('xMsg').textContent=`${posts.length} postes ajoutés au budget.`};
+  }
+  async function getBlob(p){try{return rt.local?await Local.getBlob(p.asset):await fetch('/_blob/'+p.asset).then(r=>r.ok?r.blob():null)}catch(e){return null}}
+  async function run(){
+    if(busy||!rt.sample)return;
+    busy=true;render();const msg=$('xRunMsg');
+    try{
+      msg.textContent='Préparation des photos…';
+      const lim=await rt.sample.limits().catch(()=>null);const maxImg=Math.min(4,(lim&&lim.images&&lim.images.maxCount)||4);
+      // choisir des photos de zones variées
+      const pick=[],seen=new Set();for(const p of photos){const z=p.zone||p.id;if(!seen.has(z)){seen.add(z);pick.push(p)}if(pick.length>=maxImg)break}
+      for(const p of photos){if(pick.length>=maxImg)break;if(!pick.includes(p))pick.push(p)}
+      const blobs=(await Promise.all(pick.map(getBlob))).filter(Boolean);
+      const notes=photos.filter(p=>p.analysis).slice(0,30).map((p,i)=>`Photo ${i+1}${p.zone?' ('+p.zone+')':''}${p.note?' — remarque : '+p.note:''} : ${p.analysis.vue||''}. État ${p.analysis.note_etat||'?'}/5. ${p.analysis.resume||''} À changer : ${(p.analysis.a_changer||[]).map(a=>a.piece+' ('+a.priorite+')').join(', ')||'rien'}.`).join('\n');
+      const t=Budget.summary?await Budget.summary():{};
+      msg.textContent=(rt.local?'Gemini':'Claude')+' examine ta voiture…';
+      const prompt=`Tu es expert automobile spécialisé VW refroidies par air, mandaté pour expertiser une Coccinelle 1302 berline de 1972 (moteur AB 1 285 cm³, en cours de restauration par son propriétaire, moteur déposé).
+Tu reçois ${blobs.length} photos de la voiture et les analyses des ${photos.filter(p=>p.analysis).length} photos déjà examinées :
+${notes||'(aucune analyse préalable)'}
+Situation financière : ${JSON.stringify({deja_paye:t.deja_paye,reste_estime:t.reste_estime,prix_achat:t.prix_achat})}.
+Marché relevé le ${MARKET.date} pour des berlines 1302 1970-1972 (prix demandés) :
+${MARKET.tiers.map(x=>`- ${x.nom} (${x.id}) : ${x.min}-${x.max} €, médiane ${x.med} €`).join('\n')}
+Annonces comparées : ${MARKET.comps.map(c=>`${c[3]} ${c[2]} ${c[1]} ${c[0]} ${c[4]} €`).join(' ; ')}.
+
+Fais une expertise honnête et prudente : ne conclus que sur ce qui est visible, signale ce que les photos ne montrent pas. Positionne la voiture par rapport aux annonces. Chiffre le chantier pour l'amener à l'état « bon » (travaux faits par le propriétaire, pièces au prix catalogue ; utilise l'outil chercher_pieces pour les pièces principales). Ne recompte pas ce qui est déjà payé.
+Réponds uniquement avec un objet JSON :
+{"note":1-10,"niveau":"restaurer|jus|bon|restauree","resume":"3 phrases","zones":[{"zone":"","note":1-10,"constat":"","vu":true}],"valeur":{"aujourdhui":[min,max],"apres_travaux":[min,max],"etat_vise":"","comparaison":"2-3 phrases qui situent la voiture par rapport aux annonces"},"points_forts":[""],"points_faibles":[""],"chantier":{"postes":[{"groupe":"","intitule":"","priorite":"urgent|à prévoir|optionnel","min":0,"max":0,"commentaire":""}],"duree":"ex. 4 à 6 mois de week-ends","difficulte":"facile|moyenne|difficile"},"conseils":[""],"photos_manquantes":[""]}`;
+      const tools=[{name:'chercher_pieces',description:"Cherche une pièce de la 1302 dans le catalogue (nom français ou réf. VW). Renvoie réf. VW, désignation et prix Mecatechnic / Dream Machine.",inputSchema:{type:'object',properties:{q:{type:'string'}},required:['q']},
+        execute:({q})=>findParts(String(q||''),8).map(([r,p])=>({ref_vw:oem1(p),designation:p[0],mecatechnic:(p[3]||[])[0]?p[3][0][2]+' €':null,dream_machine:(p[4]||[])[0]?p[4][0][2]+' €':null}))}];
+      const r=await rt.sample.json(prompt,{images:blobs,tools,modelTier:'complex'});
+      if(!r||typeof r!=='object')throw{code:'invalid_json'};
+      exp={r,date:Date.now(),nbPhotos:photos.length,ia:rt.local?'Gemini':'Claude'};
+      await rt.db.doc('expertise/derniere').set(exp);msg.textContent='Expertise terminée.';
+    }catch(e){msg.textContent={bad_key:'Clé Gemini refusée : vérifie-la dans Réglages IA.',unavailable:'IA surchargée : réessaie dans une minute.',rate_limited:'Trop de demandes : réessaie dans une minute.',not_granted:'Autorise Claude pour cet atlas, puis relance.',invalid_json:'Réponse illisible : relance l\'expertise.',image_rejected:'Une photo a été refusée (format ou taille).'}[e&&e.code]||'Expertise interrompue : relance.'}
+    finally{busy=false;render()}
+  }
+  $('xRun').addEventListener('click',run);
+  return {open,last:()=>exp&&exp.r};
+})();
+
 setTimeout(()=>{Budget.open().catch(()=>{})},50);
 
 window.addEventListener('hashchange',show);
