@@ -349,6 +349,22 @@ input.mn{width:84px;font:13px var(--mono);padding:4px 6px;border:1px solid var(-
 .otbl tr.st-montée select{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
 .otbl tr.st-reçue select{background:var(--note-soft);color:var(--note)}
 .otbl tr.st-retourner select{background:var(--accent-soft);color:var(--accent)}
+
+.payf{border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0;display:flex;flex-direction:column;gap:8px}
+.payf legend{font:600 15px var(--display);padding:0 6px}
+.prows{display:flex;flex-direction:column;gap:6px}
+.prow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.prow input{font:14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+.prow [data-pn]{flex:1;min-width:120px}.prow [data-pm]{width:120px;font-family:var(--mono)}
+.prow .btn{padding:4px 9px}
+.pchip{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;background:var(--note-soft);color:var(--note);border-radius:12px;padding:2px 9px;margin:0 4px 3px 0;white-space:nowrap}
+.pchip b{font:600 12px var(--mono)}
+.pchip button{border:0;background:none;color:inherit;cursor:pointer;font-size:12px;padding:0 0 0 2px}
+.pay-none{font-size:12.5px;color:var(--accent)}
+.pnames{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pnames input{font:14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:6px 8px;width:180px}
+.ptitle{margin:8px 0 0;font:600 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+tfoot th{border-top:1px solid var(--line);font:600 13px var(--mono);text-transform:none;letter-spacing:0;color:var(--ink)}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -463,7 +479,14 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
           <header class="card-h"><span class="code">1</span><h3>Factures déjà payées</h3></header>
           <label class="drop" id="bDrop"><input type="file" id="bFile" accept="image/*,application/pdf" multiple><b>Ajouter des factures</b><span>Photo ou PDF : clique ou glisse ici. Plusieurs fichiers d'un coup, c'est possible.</span></label>
           <div class="actions"><button class="btn" type="button" id="bManual">Saisir une dépense à la main</button></div>
-          <div class="tw"><table><thead><tr><th>Date</th><th>Fournisseur</th><th>Familles</th><th style="text-align:right">Total TTC</th><th>Aperçu</th><th></th></tr></thead><tbody id="bFact"></tbody></table></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Fournisseur</th><th>Familles</th><th style="text-align:right">Total TTC</th><th>Payé par</th><th>Aperçu</th><th></th></tr></thead><tbody id="bFact"></tbody></table></div>
+        </section>
+
+        <section class="card">
+          <header class="card-h"><span class="code">€</span><h3>Qui a payé quoi</h3></header>
+          <div class="pnames"><span class="src">Payeurs :</span><span id="pNames"></span><input id="pNew" placeholder="Ajouter un payeur" aria-label="Nom du payeur"><button class="btn" type="button" id="pAdd">Ajouter</button></div>
+          <div id="pStats"></div>
+          <datalist id="payList"></datalist>
         </section>
 
         <section class="card">
@@ -1278,7 +1301,7 @@ const Budget=(()=>{
   const famOf=g=>GROUPES.includes(g)?g:'Divers';
   let famTab='Toutes';
   const subs=[];
-  let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15}, busy={};
+  let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15,payeurs:['Paul']}, busy={};
   const num=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
   const e0=n=>eur(Math.round(num(n)*100)/100);
   const fmtD=s=>{if(!s)return '—';const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})};
@@ -1335,15 +1358,16 @@ const Budget=(()=>{
     const scale=Math.max(t.budget,t.projMax,1);
     $('bBar').innerHTML=`<div class="seg paid" style="width:${t.paye/scale*100}%" title="Payé ${e0(t.paye)}"></div><div class="seg est" style="width:${t.min/scale*100}%" title="Reste minimum ${e0(t.min)}"></div><div class="seg est2" style="width:${(t.max-t.min)/scale*100}%" title="Fourchette haute"></div>${t.budget?`<i class="cap" style="left:${t.budget/scale*100}%" title="Budget max"></i>`:''}`;
     // factures
-    const busyF=Object.entries(busy).filter(([k])=>k.startsWith('f-new')).map(([,m])=>`<tr><td colspan="6" class="src">${esc(m)}</td></tr>`).join('');
+    const busyF=Object.entries(busy).filter(([k])=>k.startsWith('f-new')).map(([,m])=>`<tr><td colspan="7" class="src">${esc(m)}</td></tr>`).join('');
     $('bFact').innerHTML=busyF+(facts.length?facts.map(f=>{const d=f.data||{};return `<tr data-f="${f.id}">
       <td class="n">${fmtD(d.date)}</td>
       <td><b>${esc(d.fournisseur||f.name||'Facture')}</b>${d.numero?`<small>n° ${esc(d.numero)}</small>`:''}${busy[f.id]?`<small class="busy">${esc(busy[f.id])}</small>`:''}${!f.data&&!busy[f.id]?'<small>Pas encore lue</small>':''}</td>
       <td>${(()=>{const fs=[...new Set((d.lignes||[]).map(l=>famOf(l.famille||d.groupe)))];return fs.length>1?`<span title="${esc(fs.join(', '))}">${fs.length} familles</span><small>${esc(fs.slice(0,3).join(', '))}${fs.length>3?'…':''}</small>`:esc(fs[0]||d.groupe||'—')})()}</td>
       <td class="n" style="text-align:right">${d.total_ttc!=null?e0(d.total_ttc):'—'}</td>
+      <td>${payCell(f)}</td>
       <td>${f.preview?`<img class="fthumb" src="${imgSrc(f.preview)}" alt="Aperçu de la facture">`:''}</td>
       <td class="fact-act"><button class="btn" type="button" data-fopen="${f.id}">Détail</button></td></tr>
-      <tr class="fdet" data-fd="${f.id}" hidden><td colspan="6">${factDetail(f)}</td></tr>`}).join(''):(busyF?'':'<tr><td colspan="6" class="empty">Aucune facture. Glisse une photo ou un PDF de facture ci-dessus, ou ajoute-la à la main.</td></tr>'));
+      <tr class="fdet" data-fd="${f.id}" hidden><td colspan="7">${factDetail(f)}</td></tr>`}).join(''):(busyF?'':'<tr><td colspan="7" class="empty">Aucune facture. Glisse une photo ou un PDF de facture ci-dessus, ou ajoute-la à la main.</td></tr>'));
     // plan
     $('bPlan').innerHTML=plan.postes.length?plan.postes.map((p,i)=>`<tr class="${p.fait?'done':''}">
       <td><input type="checkbox" data-fait="${i}" ${p.fait?'checked':''} aria-label="Poste fait"></td>
@@ -1356,8 +1380,57 @@ const Budget=(()=>{
     // groupes
     const gs=byGroup(), gmax=Math.max(1,...gs.map(([,v])=>v.paye+v.max));
     $('bGroups').innerHTML=gs.length?gs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n" style="text-align:right">${e0(v.paye)}</td><td class="n" style="text-align:right">${v.max?e0(v.min)+' – '+e0(v.max):'—'}</td><td class="gbar"><span class="paid" style="width:${v.paye/gmax*100}%"></span><span class="est" style="width:${v.max/gmax*100}%"></span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">La répartition apparaîtra avec les premières factures ou la première estimation.</td></tr>';
-    renderFam();
+    renderFam();renderPay();
     $('bTaux').closest('label').hidden=$('bMode').value!=='garage';
+  }
+  /* ----- payeurs ----- */
+  const payeurs=()=>{const set=new Set(regl.payeurs||[]);facts.forEach(f=>(f.paiements||[]).forEach(x=>x.qui&&set.add(x.qui)));return [...set]};
+  const paidSum=f=>(f.paiements||[]).reduce((a,x)=>a+num(x.montant),0);
+  function payCell(f){
+    const P2=f.paiements||[],tot=num(f.data&&f.data.total_ttc);
+    if(!P2.length)return '<span class="pay-none">à attribuer</span>';
+    const rest=Math.round((tot-paidSum(f))*100)/100;
+    return P2.map(x=>`<span class="pchip">${esc(x.qui)} <b>${e0(x.montant)}</b></span>`).join('')+(Math.abs(rest)>=0.01?`<small class="${rest>0?'busy':''}">${rest>0?'reste '+e0(rest):'trop attribué '+e0(-rest)}</small>`:'');
+  }
+  function payRow(x){return `<div class="prow"><input list="payList" data-pn placeholder="Qui ?" value="${esc(x.qui||'')}" aria-label="Payeur"><input type="number" step="0.01" min="0" data-pm placeholder="Montant €" value="${x.montant!=null&&x.montant!==''?esc(x.montant):''}" aria-label="Montant payé"><button type="button" class="btn" data-prm aria-label="Retirer ce payeur">✕</button></div>`}
+  function payBlock(f){
+    const rows=(f.paiements&&f.paiements.length?f.paiements:[{qui:'',montant:''}]).map(payRow).join('');
+    return `<fieldset class="payf" data-payf="${f.id}"><legend>Qui a payé ?</legend>
+      <div class="prows">${rows}</div>
+      <div class="actions"><button type="button" class="btn" data-padd>+ Ajouter un payeur</button><button type="button" class="btn" data-psplit>Parts égales</button>
+      ${payeurs().map(n=>`<button type="button" class="btn" data-pall="${esc(n)}">Tout : ${esc(n)}</button>`).join('')}</div>
+      <p class="src" data-prest></p></fieldset>`;
+  }
+  const formTotal=fs=>{const i=fs.closest('.fform')&&fs.closest('.fform').querySelector('[data-k="total_ttc"]');if(i&&i.value!=='')return num(i.value);const f=facts.find(x=>x.id===fs.dataset.payf);return num(f&&f.data&&f.data.total_ttc)};
+  function payRest(fs){const tot=formTotal(fs);let s=0;fs.querySelectorAll('[data-pm]').forEach(i=>s+=num(i.value));const r=Math.round((tot-s)*100)/100;
+    fs.querySelector('[data-prest]').textContent=tot?(Math.abs(r)<0.01?'Total entièrement attribué.':r>0?`Reste à attribuer : ${e0(r)} sur ${e0(tot)}`:`Attention : ${e0(-r)} de plus que le total de la facture`):'Renseigne d\'abord le total TTC de la facture.'}
+  function payStats(){
+    const by={},fam={};let none=0;const famsUsed=new Set();
+    facts.forEach(f=>{const d=f.data||{},tot=num(d.total_ttc),P2=(f.paiements||[]).filter(x=>x.qui&&num(x.montant));
+      const L=(d.lignes||[]).filter(l=>num(l.prix_ttc));const lsum=L.reduce((a,l)=>a+num(l.prix_ttc),0);
+      const famShare={};if(L.length&&lsum){L.forEach(l=>{const g=famOf(l.famille||d.groupe);famShare[g]=(famShare[g]||0)+num(l.prix_ttc)/lsum})}else famShare[famOf(d.groupe)]=1;
+      const paid=P2.reduce((a,x)=>a+num(x.montant),0);none+=Math.max(0,tot-paid);
+      P2.forEach(x=>{const e=by[x.qui]||(by[x.qui]={tot:0,n:0});e.tot+=num(x.montant);e.n++;
+        Object.entries(famShare).forEach(([g,sh])=>{famsUsed.add(g);(fam[x.qui]=fam[x.qui]||{})[g]=((fam[x.qui]||{})[g]||0)+num(x.montant)*sh})})});
+    return {by,fam,none,fams:[...famsUsed]};
+  }
+  function renderPay(){
+    const st=payStats(),names=Object.keys(st.by).sort((a,b)=>st.by[b].tot-st.by[a].tot),all=names.reduce((a,n)=>a+st.by[n].tot,0);
+    $('pNames').innerHTML=(regl.payeurs||[]).map(n=>`<span class="pchip">${esc(n)} <button type="button" data-pdelname="${esc(n)}" aria-label="Retirer ${esc(n)}">✕</button></span>`).join('')||'<span class="src">Aucun payeur enregistré.</span>';
+    $('payList').innerHTML=payeurs().map(n=>`<option value="${esc(n)}"></option>`).join('');
+    if(!names.length){$('pStats').innerHTML=`<p class="src">Ouvre une facture (bouton « Détail ») et indique qui a payé : les statistiques apparaîtront ici.${st.none?' Montant encore à attribuer : '+e0(st.none)+'.':''}</p>`;return}
+    const mx=Math.max(...names.map(n=>st.by[n].tot));
+    let h=`<div class="tw"><table><thead><tr><th>Payeur</th><th style="text-align:right">Total payé</th><th style="text-align:right">Part</th><th>Factures</th><th style="width:36%"></th></tr></thead><tbody>`+
+      names.map(n=>`<tr><td><b>${esc(n)}</b></td><td class="n" style="text-align:right">${e0(st.by[n].tot)}</td><td class="n" style="text-align:right">${Math.round(st.by[n].tot/all*100)} %</td><td class="n">${st.by[n].n}</td><td class="gbar"><span class="paid" style="width:${st.by[n].tot/mx*100}%"></span></td></tr>`).join('')+
+      (st.none>0.009?`<tr><td><i>Non attribué</i></td><td class="n" style="text-align:right">${e0(st.none)}</td><td></td><td></td><td></td></tr>`:'')+
+      `</tbody><tfoot><tr><th>Total attribué</th><th style="text-align:right">${e0(all)}</th><th></th><th></th><th></th></tr></tfoot></table></div>`;
+    const fams=GROUPES.filter(g=>st.fams.includes(g));
+    if(fams.length)h+=`<h4 class="ptitle">Par famille</h4><div class="tw"><table><thead><tr><th>Famille</th>${names.map(n=>`<th style="text-align:right">${esc(n)}</th>`).join('')}</tr></thead><tbody>`+
+      fams.map(g=>`<tr><td>${esc(g)}</td>${names.map(n=>`<td class="n" style="text-align:right">${(st.fam[n]||{})[g]?e0(st.fam[n][g]):'—'}</td>`).join('')}</tr>`).join('')+`</tbody></table></div>`;
+    if(names.length>1){const avg=all/names.length,bal=names.map(n=>({n,d:st.by[n].tot-avg})),cr=bal.filter(x=>x.d>0.01).sort((a,b)=>b.d-a.d),de=bal.filter(x=>x.d<-0.01).sort((a,b)=>a.d-b.d),tr=[];
+      let i=0,j=0;while(i<de.length&&j<cr.length){const m=Math.min(-de[i].d,cr[j].d);tr.push(`${esc(de[i].n)} doit ${e0(m)} à ${esc(cr[j].n)}`);de[i].d+=m;cr[j].d-=m;if(-de[i].d<0.01)i++;if(cr[j].d<0.01)j++}
+      h+=`<h4 class="ptitle">Si vous partagez à parts égales</h4><p class="src">Part de chacun : ${e0(avg)}.</p>`+(tr.length?`<ul class="points">${tr.map(t=>`<li><div>${t}</div></li>`).join('')}</ul>`:'<p class="src">Tout le monde est à égalité.</p>');}
+    $('pStats').innerHTML=h;
   }
   function allLines(){const out=[];facts.forEach(f=>{const d=f.data||{};(d.lignes||[]).forEach((l,i)=>out.push({f,d,l,i,fam:famOf(l.famille||d.groupe)}))});return out}
   function renderFam(){
@@ -1380,6 +1453,7 @@ const Budget=(()=>{
         <div class="frow"><label>Fournisseur<input data-k="fournisseur" value="${esc(d.fournisseur||'')}"></label><label>Date<input type="date" data-k="date" value="${esc(d.date||'')}"></label></div>
         <div class="frow"><label>Total TTC (€)<input type="number" step="0.01" data-k="total_ttc" value="${d.total_ttc!=null?esc(d.total_ttc):''}"></label><label>Groupe<select data-k="groupe">${GROUPES.map(g=>`<option ${g===d.groupe?'selected':''}>${esc(g)}</option>`).join('')}</select></label></div>
         <label>Remarque<input data-k="remarque" value="${esc(d.remarque||'')}"></label>
+        ${payBlock(f)}
         ${lignes?`<div class="tw"><table><thead><tr><th>Ligne</th><th>Réf.</th><th>Qté</th><th style="text-align:right">TTC</th></tr></thead><tbody>${lignes}</tbody></table></div>`:''}
         <div class="actions"><button class="btn pri" type="button" data-fsave="${f.id}">Enregistrer</button>${f.asset&&rt.sample?`<button class="btn" type="button" data-fread="${f.id}">Relire avec l'IA</button>`:''}<button class="btn" type="button" data-fdel="${f.id}">Supprimer</button></div>
       </div></div>`;
@@ -1508,6 +1582,11 @@ Réponds uniquement avec un objet JSON :
     plan.postes.push({groupe:'Divers',intitule:'Commande « Ma liste de pièces »',pieces,min:Math.round(tot),max:Math.round(tot*1.1),fait:false,manuel:true,commentaire:'au meilleur prix relevé, +10 % en haut de fourchette'});
     savePlan();render();$('bEstMsg').textContent='Ta liste a été ajoutée comme poste.';
   });
+  $('bFact').addEventListener('input',e=>{const pf=e.target.closest('[data-payf]')||(e.target.matches('[data-k="total_ttc"]')&&e.target.closest('.fform').querySelector('[data-payf]'));if(pf)payRest(pf)});
+  $('bFact').addEventListener('toggle',()=>{},true);
+  $('pAdd').addEventListener('click',()=>{const n=$('pNew').value.trim();if(!n)return;regl.payeurs=[...new Set([...(regl.payeurs||[]),n])];$('pNew').value='';saveRegl();render()});
+  $('pNew').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('pAdd').click()}});
+  $('pNames').addEventListener('click',e=>{const b=e.target.closest('[data-pdelname]');if(b){regl.payeurs=(regl.payeurs||[]).filter(n=>n!==b.dataset.pdelname);saveRegl();render()}});
   $('bTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b){famTab=b.dataset.tab;renderFam()}});
   $('bLines').addEventListener('change',async e=>{const t=e.target.closest('[data-lf]');if(!t)return;const [fid,i]=t.dataset.lf.split(':');const f=facts.find(x=>x.id===fid);if(!f||!f.data)return;
     const d={...f.data,lignes:f.data.lignes.map((l,k)=>k===+i?{...l,famille:t.value}:l)};await rt.db.collection('factures').doc(fid).update({data:d})});
@@ -1520,16 +1599,27 @@ Réponds uniquement avec un objet JSON :
   $('bPlan').addEventListener('click',e=>{const d=e.target.closest('[data-pdel]');if(d){if(!d.dataset.c){d.dataset.c=1;d.textContent='Sûr ?';return}plan.postes.splice(+d.dataset.pdel,1);savePlan();render()}
     const go=e.target.closest('a[data-go]');if(go)pendingRef=go.dataset.go});
   $('bFact').addEventListener('click',async e=>{
-    const o=e.target.closest('[data-fopen]');if(o){const r=document.querySelector(`[data-fd="${o.dataset.fopen}"]`);r.hidden=!r.hidden;return}
+    const o=e.target.closest('[data-fopen]');if(o){const r=document.querySelector(`[data-fd="${o.dataset.fopen}"]`);r.hidden=!r.hidden;const pf=r.querySelector('[data-payf]');if(pf)payRest(pf);return}
+    const pf=e.target.closest('[data-payf]');
+    if(pf){const rows=pf.querySelector('.prows');
+      if(e.target.closest('[data-padd]')){rows.insertAdjacentHTML('beforeend',payRow({}));rows.lastElementChild.querySelector('[data-pn]').focus();payRest(pf);return}
+      if(e.target.closest('[data-prm]')){e.target.closest('.prow').remove();if(!rows.children.length)rows.insertAdjacentHTML('beforeend',payRow({}));payRest(pf);return}
+      const all=e.target.closest('[data-pall]');if(all){rows.innerHTML=payRow({qui:all.dataset.pall,montant:formTotal(pf)});payRest(pf);return}
+      if(e.target.closest('[data-psplit]')){const tot=formTotal(pf),rs=[...rows.querySelectorAll('.prow')].filter(r=>r.querySelector('[data-pn]').value.trim());
+        if(!rs.length||!tot){pf.querySelector('[data-prest]').textContent='Indique au moins un nom, et le total de la facture.';return}
+        const part=Math.floor(tot/rs.length*100)/100;rs.forEach((r,k)=>r.querySelector('[data-pm]').value=k===rs.length-1?(Math.round((tot-part*(rs.length-1))*100)/100):part);payRest(pf);return}
+    }
     const sv=e.target.closest('[data-fsave]');if(sv){const id=sv.dataset.fsave,f=facts.find(x=>x.id===id),box=sv.closest('.fform');const d={...(f.data||{})};
+      const pays=[...box.querySelectorAll('.prow')].map(r=>({qui:r.querySelector('[data-pn]').value.trim(),montant:num(r.querySelector('[data-pm]').value)})).filter(x=>x.qui);
+      const known=new Set(regl.payeurs||[]);let nw=false;pays.forEach(x=>{if(!known.has(x.qui)){known.add(x.qui);nw=true}});if(nw){regl.payeurs=[...known];saveRegl()}
       box.querySelectorAll('[data-k]').forEach(i=>{d[i.dataset.k]=i.dataset.k==='total_ttc'?num(i.value):i.value});
-      await rt.db.collection('factures').doc(id).update({data:d});return}
+      await rt.db.collection('factures').doc(id).update({data:d,paiements:pays});sv.textContent='Enregistré ✓';return}
     const rd=e.target.closest('[data-fread]');if(rd){const f=facts.find(x=>x.id===rd.dataset.fread);if(f)readInvoice(f);return}
     const dl=e.target.closest('[data-fdel]');if(dl){if(!dl.dataset.c){dl.dataset.c=1;dl.textContent='Confirmer la suppression';return}
       const f=facts.find(x=>x.id===dl.dataset.fdel);await rt.db.collection('factures').doc(f.id).delete();for(const id of new Set([f.asset,...(f.pages||[])]))if(id)rt.assets.delete(id).catch(()=>{});return}
     const im=e.target.closest('img.fthumb');if(im){const lb=document.createElement('div');lb.className='lb';lb.innerHTML=`<img src="${im.src}" alt="Facture">`;lb.addEventListener('click',()=>lb.remove());document.body.appendChild(lb)}
   });
-  const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
+  const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,payeurs:Object.fromEntries(Object.entries(payStats().by).map(([n,v])=>[n,Math.round(v.tot)])),postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
   return {open,summary:async()=>{if(!started)await open();return summary()},lines:()=>allLines(),onChange:fn=>subs.push(fn),ready:()=>started&&!!rt,rt:()=>rt};
 })();
 
