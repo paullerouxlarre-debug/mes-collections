@@ -342,6 +342,13 @@ input.mn{width:84px;font:13px var(--mono);padding:4px 6px;border:1px solid var(-
 .ftabs button[aria-selected="true"] span{color:var(--bar-muted)}
 .ftabs button:focus-visible{outline:2px solid var(--accent)}
 #bLines select{font:13px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:4px 6px;max-width:190px}
+
+.tag.ord{background:var(--note-soft);color:var(--note)}
+.otbl select{font:13px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:4px 6px}
+.otbl tr.st-montée td{color:var(--muted)}
+.otbl tr.st-montée select{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.otbl tr.st-reçue select{background:var(--note-soft);color:var(--note)}
+.otbl tr.st-retourner select{background:var(--accent-soft);color:var(--accent)}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -395,6 +402,7 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
           <a href="#fiche-f4"><b>Fiche F4 · Changer les freins</b><span>Roue par roue, puis purge (F5)</span></a>
           <a href="#a-pistons"><b>Pistons et segments</b><span>Segments 77 mm, fiche P4</span></a>
           <a href="#a-distributor"><b>Allumeur</b><span>113 905 205 K : rupteur, condensateur, tête, rotor</span></a>
+          <a href="#commandes"><b>Pièces commandées</b><span>Toutes les pièces de tes factures, par famille, avec leur statut</span></a>
           <a href="#budget"><b>Budget travaux</b><span>Factures payées, travaux estimés, budget max</span></a>
           <a href="#photos"><b>Mes photos et analyses</b><span>Dépose une photo : identification, état, pièces à changer</span></a>
           <a href="#diagnostic"><b>Diagnostic moteur du 4 nov.</b><span>Mes 9 photos annotées</span></a>
@@ -417,6 +425,21 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
       </section>
       <section class="card" id="bilan" hidden></section>
       <div id="photoBox" class="pgrid"></div>
+    </div>
+
+    <div class="page" data-page="commandes" hidden>
+      <div class="phead"><span class="kicker">Mes pièces</span><h1>Pièces commandées</h1>
+        <p class="lead">Toutes les pièces lues sur tes factures, regroupées par référence et rangées par famille. Les quantités et montants s'additionnent quand une même pièce apparaît sur plusieurs factures. Suis chaque pièce : commandée, reçue, montée. Les pièces commandées sont aussi signalées dans les tableaux du catalogue et dans ta liste.</p></div>
+      <div id="oState"></div>
+      <div id="oApp" hidden style="display:flex;flex-direction:column;gap:18px">
+        <section class="card"><div class="bkpi" id="oKpi"></div></section>
+        <section class="card">
+          <div class="ftabs" id="oTabs" role="tablist" aria-label="Familles"></div>
+          <div class="tools"><input type="search" id="oQ" placeholder="Chercher une pièce ou une référence…" aria-label="Chercher dans les pièces commandées"><button class="btn" type="button" id="oCopy">Copier la liste</button><span class="src" id="oMsg"></span></div>
+          <div class="tw"><table class="otbl"><thead><tr><th>Statut</th><th>Pièce</th><th>Réf.</th><th>Famille</th><th>Qté</th><th style="text-align:right">Montant TTC</th><th>Facture(s)</th></tr></thead><tbody id="oRows"></tbody></table></div>
+          <p class="src">Le port, la main-d'œuvre et les remises restent dans <a href="#budget">Budget travaux</a>. Une pièce mal classée ? Change sa famille dans Budget travaux, section « Pièces payées par famille ».</p>
+        </section>
+      </div>
     </div>
 
     <div class="page" data-page="budget" hidden>
@@ -678,6 +701,7 @@ let h='<div class="sec">Atelier</div>'+
   '<a class="it" href="#couples"><span class="n">Nm</span>Couples de serrage</a>'+
   '<a class="it" href="#fiche"><span class="n">i</span>Fiche technique</a>'+
   '<a class="it" href="#liste"><span class="n">+</span>Ma liste de pièces</a>'+
+  '<a class="it" href="#commandes"><span class="n">✓</span>Pièces commandées (factures)</a>'+
   '<a class="it" href="#budget"><span class="n">€</span>Budget travaux et factures</a>'+
   (window.claude&&window.claude.use?'':'<a class="it" href="#" data-ai-settings><span class="n">⚙</span>Réglages IA (clé Gemini)</a>')+
   '<div class="sec">Pièces par groupe</div>';
@@ -723,7 +747,7 @@ function rowsHtml(v,filt,only1302){
   v.rows.forEach(([n,refs])=>{
     const items=refs.map(r=>[r,P[r]]).filter(([r,p])=>p&&(!filt||norm(p[0]).includes(filt)||nz(p[1]).includes(nz(filt))||[...(p[3]||[]),...(p[4]||[])].some(x=>nz(x[1]).includes(nz(filt))))&&(!only1302||/1302/.test(p[2])));
     items.forEach(([r,p],i)=>{shown++;
-      out+=`<tr data-ref="${r}" data-pos="${n}" class="${i===0?'first':''}">${i===0?`<td class="pos" rowspan="${items.length}"><button type="button" class="pin" data-pin="${n}" aria-label="Montrer le repère ${n} sur la vue éclatée">${n}</button></td>`:''}<td class="nm"><b>${esc(p[0])}</b>${tagsHtml(p)}${appHtml(p[2])}</td><td class="oem">${oemHtml(p[1])}</td>`+
+      out+=`<tr data-ref="${r}" data-pos="${n}" class="${i===0?'first':''}">${i===0?`<td class="pos" rowspan="${items.length}"><button type="button" class="pin" data-pin="${n}" aria-label="Montrer le repère ${n} sur la vue éclatée">${n}</button></td>`:''}<td class="nm"><b>${esc(p[0])}</b>${tagsHtml(p)}${typeof Orders!=='undefined'?Orders.tag(r):''}${appHtml(p[2])}</td><td class="oem">${oemHtml(p[1])}</td>`+
         `<td class="sh">${shopCell(p[3],MECA,mSearch,p)}</td><td class="sh">${shopCell(p[4],DM,dSearch,p)}</td><td class="add">${addBtn(r)}</td></tr>`;
     });
   });
@@ -799,7 +823,7 @@ function show(){
   const hh=decodeURIComponent(location.hash.slice(1))||'accueil';
   let page=pages.find(p=>p.dataset.page===hh&&p!==dyn), cur=hh, ch=null;
   pages.forEach(p=>p.hidden=true);
-  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget')Budget.open()}
+  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget')Budget.open();if(hh==='commandes')Orders.open()}
   else{
     let html='';
     if(hh.startsWith('a-')&&byId[hh.slice(2)]){const v=byId[hh.slice(2)];html=pageView(v);ch=v.ch}
@@ -849,7 +873,7 @@ function renderList(){
   if(!refs.length){box.innerHTML='<p class="lead">Ta liste est vide. Dans un tableau de pièces ou une analyse de photo, le bouton + ajoute la pièce ici.</p>';return}
   let tot=0,miss=0;
   const rows=refs.map(r=>{const p=P[r];if(!p)return '';const q=list[r],b=best(p),w=(where[r]||[])[0];if(b)tot+=b.p*q;else miss++;
-    return `<tr><td>${esc(p[0])}${w?`<small><a href="#a-${w[0]}">${esc(byId[w[0]].t)}</a></small>`:''}</td><td class="n">${esc(oem1(p)||'—')}</td><td class="sh">${shopCell(p[3],MECA,mSearch,p)}</td><td class="sh">${shopCell(p[4],DM,dSearch,p)}</td><td><input type="number" min="1" value="${q}" data-q="${r}" aria-label="Quantité"></td><td class="n" style="text-align:right">${b?eur(b.p*q):'—'}</td><td>${addBtn(r)}</td></tr>`}).join('');
+    return `<tr><td>${esc(p[0])}${typeof Orders!=='undefined'?Orders.tag(r):''}${w?`<small><a href="#a-${w[0]}">${esc(byId[w[0]].t)}</a></small>`:''}</td><td class="n">${esc(oem1(p)||'—')}</td><td class="sh">${shopCell(p[3],MECA,mSearch,p)}</td><td class="sh">${shopCell(p[4],DM,dSearch,p)}</td><td><input type="number" min="1" value="${q}" data-q="${r}" aria-label="Quantité"></td><td class="n" style="text-align:right">${b?eur(b.p*q):'—'}</td><td>${addBtn(r)}</td></tr>`}).join('');
   box.innerHTML=`<div class="tw"><table class="listtbl"><thead><tr><th>Pièce</th><th>Réf. VW</th><th>Mecatechnic</th><th>Dream Machine</th><th>Qté</th><th style="text-align:right">Meilleur prix</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
   <div class="total"><span>${refs.length} références${miss?` · ${miss} sans prix trouvé`:''}</span><span>Total au meilleur prix : ${eur(tot)}</span></div>
   <div class="actions"><button class="btn pri" type="button" id="copyList">Copier la liste</button><button class="btn" type="button" id="clearList">Vider la liste</button><span class="src" id="copyMsg"></span></div><pre id="listTxt" hidden></pre>`;
@@ -1253,6 +1277,7 @@ const Budget=(()=>{
   const GROUPES=['Moteur','Alimentation essence et carburation','Allumage','Refroidissement et chauffage','Échappement','Embrayage et boîte de vitesses','Freinage','Direction','Suspension et train avant','Train arrière et transmission','Roues et pneus','Électricité et éclairage','Carrosserie','Vitrage et joints','Sellerie et intérieur','Consommables et outillage','Main-d\'œuvre','Frais de port','Divers'];
   const famOf=g=>GROUPES.includes(g)?g:'Divers';
   let famTab='Toutes';
+  const subs=[];
   let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15}, busy={};
   const num=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
   const e0=n=>eur(Math.round(num(n)*100)/100);
@@ -1265,7 +1290,7 @@ const Budget=(()=>{
     return null;
   }
   async function open(){
-    if(started){render();return}
+    if(started){if(rt)render();return}
     started=true;
     rt=await getRT();
     if(!rt){started=false;$('bState').innerHTML=(window.claude&&window.claude.use)?'<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude.</p>':'<p class="warn"><b>Clé Gemini à coller</b>Sur cette version, le budget est gardé dans ce navigateur et les factures sont lues par Gemini. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';return}
@@ -1275,7 +1300,7 @@ const Budget=(()=>{
     try{const r=await rt.db.doc('budget/reglages').get();const d=r.data();if(d)regl={...regl,...d}}catch(e){}
     try{const p=await rt.db.doc('budget/plan').get();const d=p.data();if(d&&Array.isArray(d.postes))plan=d}catch(e){}
     $('bMax').value=regl.max||'';$('bMode').value=regl.mode;$('bTaux').value=regl.taux;$('bMarge').value=regl.marge;
-    rt.db.collection('factures').orderBy('createdAt','desc').onSnapshot(async s=>{facts=s.docs.map(d=>({id:d.id,...d.data()}));if(local)await Local.preload(facts.map(f=>f.preview).filter(Boolean));render()},err=>{$('bState').innerHTML='<p class="warn"><b>Erreur</b>'+esc(err.message||err.code)+'</p>'});
+    rt.db.collection('factures').orderBy('createdAt','desc').onSnapshot(async s=>{facts=s.docs.map(d=>({id:d.id,...d.data()}));if(local)await Local.preload(facts.map(f=>f.preview).filter(Boolean));render();subs.forEach(fn=>{try{fn()}catch(e){}})},err=>{$('bState').innerHTML='<p class="warn"><b>Erreur</b>'+esc(err.message||err.code)+'</p>'});
     render();
   }
   const saveRegl=()=>rt&&rt.db.doc('budget/reglages').set(regl).catch(()=>{});
@@ -1505,8 +1530,74 @@ Réponds uniquement avec un objet JSON :
     const im=e.target.closest('img.fthumb');if(im){const lb=document.createElement('div');lb.className='lb';lb.innerHTML=`<img src="${im.src}" alt="Facture">`;lb.addEventListener('click',()=>lb.remove());document.body.appendChild(lb)}
   });
   const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
-  return {open,summary:async()=>{if(!started)await open();return summary()}};
+  return {open,summary:async()=>{if(!started)await open();return summary()},lines:()=>allLines(),onChange:fn=>subs.push(fn),ready:()=>started&&!!rt,rt:()=>rt};
 })();
+
+/* ---------- pièces commandées : tout ce qui figure sur les factures ---------- */
+const Orders=(()=>{
+  const $=id=>document.getElementById(id);
+  const n0=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+  const SKIP=new Set(['Frais de port','Main-d\'œuvre']);
+  const STATUTS=['commandée','reçue','montée','à retourner'];
+  let statut={}, tab='Toutes', loadedSt=false, items=[];
+  const cat={};
+  function keyOf(l){const rs=l.ref?byOem[nz(l.ref)]:null;if(rs&&rs.length)return 'c:'+rs[0];if(l.ref&&nz(l.ref).length>=4)return 'r:'+nz(l.ref);return 'd:'+norm(l.designation||l.piece_vw||'').replace(/\s+/g,' ').slice(0,70)}
+  function aggregate(){
+    const m={};
+    Budget.lines().forEach(({f,d,l,fam})=>{
+      if(SKIP.has(fam)||n0(l.prix_ttc)<0)return;
+      const k=keyOf(l);
+      const e=m[k]||(m[k]={k,fam,cat:k.startsWith('c:')?k.slice(2):null,names:[],refs:[],qte:0,montant:0,fact:[]});
+      const nm=l.designation||l.piece_vw||'';if(nm&&!e.names.includes(nm))e.names.push(nm);
+      if(l.ref&&!e.refs.includes(l.ref))e.refs.push(l.ref);
+      e.qte+=n0(l.qte)||1;e.montant+=n0(l.prix_ttc);
+      if(!e.fact.some(x=>x.id===f.id))e.fact.push({id:f.id,fournisseur:d.fournisseur||'',date:d.date||''});
+    });
+    items=Object.values(m).sort((a,b)=>a.fam.localeCompare(b.fam)||String(b.fact[0]?.date||'').localeCompare(String(a.fact[0]?.date||'')));
+    Object.keys(cat).forEach(k=>delete cat[k]);
+    items.forEach(e=>{if(e.cat)cat[e.cat]={qte:e.qte,date:e.fact.map(x=>x.date).sort().pop()||''}});
+  }
+  function refresh(){
+    aggregate();
+    if(!document.querySelector('[data-page="commandes"]').hidden)render();
+    if(!document.querySelector('[data-page="liste"]').hidden)renderList();
+    const vf=document.getElementById('vf');if(vf)vf.dispatchEvent(new Event('input'));
+  }
+  const tag=r=>cat[r]?`<span class="tag ord" title="Sur une facture${cat[r].date?' du '+esc(cat[r].date):''}">commandée${cat[r].qte>1?' ×'+cat[r].qte:''}</span>`:'';
+  async function loadStatut(){if(loadedSt)return;loadedSt=true;try{const r=await Budget.rt().db.doc('budget/statuts').get();const d=r.data();if(d)statut=d}catch(e){}}
+  const saveStatut=()=>Budget.rt().db.doc('budget/statuts').set(statut).catch(()=>{});
+  async function open(){
+    if(!Budget.ready()){await Budget.open()}
+    if(!Budget.ready()){$('oState').innerHTML=(window.claude&&window.claude.use)?'<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude.</p>':'<p class="warn"><b>Clé Gemini à coller</b>Tes factures sont gardées dans ce navigateur et lues par Gemini. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';$('oApp').hidden=true;return}
+    $('oState').innerHTML='';$('oApp').hidden=false;
+    await loadStatut();aggregate();render();
+  }
+  function render(){
+    const qs=norm($('oQ').value.trim());
+    const fams=[...new Set(items.map(e=>e.fam))];
+    if(tab!=='Toutes'&&!fams.includes(tab))tab='Toutes';
+    const sum=a=>a.reduce((s,e)=>s+e.montant,0);
+    $('oKpi').innerHTML=`<div><span>Références commandées</span><b>${items.length}</b></div><div><span>Pièces (quantités)</span><b>${items.reduce((s,e)=>s+e.qte,0)}</b></div><div><span>Montant des pièces</span><b>${eur(sum(items))}</b></div><div><span>Montées</span><b>${items.filter(e=>statut[e.k]==='montée').length} / ${items.length}</b></div>`;
+    $('oTabs').innerHTML=items.length?[['Toutes',items]].concat(fams.map(g=>[g,items.filter(e=>e.fam===g)])).map(([g,a])=>`<button type="button" role="tab" aria-selected="${g===tab}" data-otab="${esc(g)}">${esc(g)}<span>${a.length} réf. · ${eur(sum(a))}</span></button>`).join(''):'';
+    const rows=items.filter(e=>(tab==='Toutes'||e.fam===tab)&&(!qs||norm(e.names.join(' ')+' '+e.refs.join(' ')+' '+(e.cat&&P[e.cat]?P[e.cat][0]+' '+P[e.cat][1]:'')).includes(qs)));
+    $('oRows').innerHTML=rows.length?rows.map(e=>{
+      const p=e.cat?P[e.cat]:null,w=e.cat?(where[e.cat]||[])[0]:null,st=statut[e.k]||'commandée';
+      return `<tr class="st-${st.replace(/\s|à/g,'')}"><td><select data-st="${esc(e.k)}" aria-label="Statut">${STATUTS.map(s=>`<option ${s===st?'selected':''}>${s}</option>`).join('')}</select></td>
+        <td><b>${esc(e.names[0]||(p?p[0]:''))}</b>${p&&norm(p[0])!==norm(e.names[0]||'')?`<small>Catalogue : ${esc(p[0])}</small>`:''}${e.names.length>1?`<small>aussi : ${esc(e.names.slice(1,3).join(' · '))}</small>`:''}</td>
+        <td class="n">${e.refs.map(x=>esc(x)).join('<br>')||'—'}${p&&oem1(p)&&!e.refs.some(x=>nz(x)===nz(oem1(p)))?`<small>VW ${esc(oem1(p))}</small>`:''}${w?`<small><a href="#a-${w[0]}" data-go="${e.cat}">voir la fiche ↗</a></small>`:''}</td>
+        <td>${esc(e.fam)}</td><td class="n">${e.qte}</td><td class="n" style="text-align:right">${eur(e.montant)}</td>
+        <td>${e.fact.map(x=>`<small>${esc(x.fournisseur||'Facture')} · ${x.date?new Date(x.date).toLocaleDateString('fr-FR'):'—'}</small>`).join('')}</td></tr>`}).join(''):`<tr><td colspan="7" class="empty">${items.length?'Aucune pièce ne correspond.':'Aucune pièce pour l\'instant : ajoute tes factures dans <a href="#budget">Budget travaux</a>, chaque ligne lue apparaîtra ici.'}</td></tr>`;
+  }
+  $('oTabs').addEventListener('click',e=>{const b=e.target.closest('[data-otab]');if(b){tab=b.dataset.otab;render()}});
+  $('oQ').addEventListener('input',render);
+  $('oRows').addEventListener('change',e=>{const s=e.target.closest('[data-st]');if(!s)return;statut[s.dataset.st]=s.value;saveStatut();render()});
+  $('oRows').addEventListener('click',e=>{const go=e.target.closest('a[data-go]');if(go)pendingRef=go.dataset.go});
+  $('oCopy').addEventListener('click',()=>{const txt=items.map(e=>`${e.qte} × ${e.names[0]||''}${e.refs.length?' ('+e.refs.join(', ')+')':''} — ${e.fam} — ${eur(e.montant)} — ${statut[e.k]||'commandée'}`).join('\n');
+    navigator.clipboard.writeText(txt).then(()=>$('oMsg').textContent='Liste copiée.').catch(()=>{$('oMsg').textContent='Copie impossible ici.'})});
+  return {open,refresh,tag,has:r=>!!cat[r]};
+})();
+Budget.onChange(()=>Orders.refresh());
+setTimeout(()=>{Budget.open().catch(()=>{})},50);
 
 window.addEventListener('hashchange',show);
 show();
