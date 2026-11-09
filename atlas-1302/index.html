@@ -294,6 +294,46 @@ body.chat-open .chat-fab{display:none}
 .ai-box{background:var(--sheet);color:var(--ink);border-radius:8px;padding:20px;max-width:480px;width:100%;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 50px rgb(0 0 0/.35)}
 .ai-box input{font:14px var(--mono);padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);width:100%}
 .ai-box p{margin:0}
+
+/* budget */
+.bkpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.bkpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.bkpi{grid-template-columns:1fr}}
+.bkpi div{border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;background:var(--paper)}
+.bkpi span{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bkpi b{font:700 24px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.bkpi em{font:normal 12.5px var(--body);color:var(--muted)}
+.bkpi .bad{border-color:var(--accent);background:var(--accent-soft)}.bkpi .bad em,.bkpi .bad b{color:var(--accent)}
+.bkpi .warnk{border-color:var(--accent)}
+.bkpi .okk{border-color:var(--ok);background:var(--ok-soft)}.bkpi .okk em{color:var(--ok)}
+.bbar{position:relative;display:flex;height:18px;border-radius:9px;background:var(--line2);overflow:visible}
+.bbar .seg{height:100%}
+.bbar .seg:first-child{border-radius:9px 0 0 9px}
+.paid{background:var(--ink)}.est{background:var(--accent)}.est2{background:repeating-linear-gradient(45deg,var(--accent-soft) 0 5px,var(--accent) 5px 7px)}
+.bbar .cap{position:absolute;top:-5px;bottom:-5px;width:3px;background:var(--ok);border-radius:2px}
+.blegend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted)}
+.blegend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.blegend .capk{background:var(--ok);width:4px}
+.bset label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.bset input,.bset select{font:14px var(--mono);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:6px 8px;width:150px}
+.bwish{width:100%;font:14px/1.5 var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px 12px;resize:vertical}
+.bwish:focus-visible{outline:2px solid var(--accent)}
+input.mn{width:84px;font:13px var(--mono);padding:4px 6px;border:1px solid var(--line);border-radius:3px;background:var(--sheet);color:var(--ink);text-align:right}
+.bplan tr.done td{color:var(--muted)}.bplan tr.done b{text-decoration:line-through}
+.bplan details{margin-top:4px;font-size:13px}.bplan summary{cursor:pointer;color:var(--note)}
+.plist{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.plist .addb{width:24px;height:24px;font-size:13px}
+.fthumb{width:54px;height:54px;object-fit:cover;border-radius:3px;border:1px solid var(--line);cursor:zoom-in}
+.busy{color:var(--accent)!important}
+.fdetail{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:16px;padding:6px 0}
+@media (max-width:700px){.fdetail{grid-template-columns:1fr}}
+.fdetail img{width:100%;border:1px solid var(--line);border-radius:4px}
+.fform{display:flex;flex-direction:column;gap:10px;min-width:0}
+.fform label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted);flex:1;min-width:140px}
+.fform input,.fform select{font:14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+.frow{display:flex;gap:10px;flex-wrap:wrap}
+.gbar{display:flex;align-items:center;gap:2px}.gbar span{display:block;height:10px;border-radius:2px}
+#bHyp ul{margin:4px 0 0;padding-left:18px}
 td small{display:block;font-size:12.5px;margin-top:2px}
 @media (max-width:900px){.tools input[type=search]{flex-basis:100%;max-width:none}}
 footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:1180px;margin-top:40px}
@@ -347,6 +387,7 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
           <a href="#fiche-f4"><b>Fiche F4 · Changer les freins</b><span>Roue par roue, puis purge (F5)</span></a>
           <a href="#a-pistons"><b>Pistons et segments</b><span>Segments 77 mm, fiche P4</span></a>
           <a href="#a-distributor"><b>Allumeur</b><span>113 905 205 K : rupteur, condensateur, tête, rotor</span></a>
+          <a href="#budget"><b>Budget travaux</b><span>Factures payées, travaux estimés, budget max</span></a>
           <a href="#photos"><b>Mes photos et analyses</b><span>Dépose une photo : identification, état, pièces à changer</span></a>
           <a href="#diagnostic"><b>Diagnostic moteur du 4 nov.</b><span>Mes 9 photos annotées</span></a>
         </div>
@@ -368,6 +409,48 @@ footer.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)
       </section>
       <section class="card" id="bilan" hidden></section>
       <div id="photoBox" class="pgrid"></div>
+    </div>
+
+    <div class="page" data-page="budget" hidden>
+      <div class="phead"><span class="kicker">Budget</span><h1>Budget travaux de la 1302</h1>
+        <p class="lead">Glisse tes factures déjà payées : elles sont lues automatiquement (fournisseur, date, total, lignes, groupe). Décris ensuite ce que tu veux encore changer : l'IA chiffre chaque poste avec les vraies références et les prix Mecatechnic et Dream Machine, en fourchette mini / maxi. Tout se compare à ton budget maximum.</p></div>
+      <div id="bState"></div>
+      <div id="bApp" hidden style="display:flex;flex-direction:column;gap:22px">
+        <section class="card">
+          <div class="bkpi" id="bKpi"></div>
+          <div class="bbar" id="bBar" aria-hidden="true"></div>
+          <div class="blegend"><span><i class="paid"></i>payé</span><span><i class="est"></i>reste à faire (mini)</span><span><i class="est2"></i>fourchette haute</span><span><i class="capk"></i>budget max</span></div>
+          <div class="tools bset">
+            <label>Budget max (€)<input id="bMax" type="number" min="0" step="50" placeholder="ex. 6000"></label>
+            <label>Travaux faits<select id="bMode"><option value="moi">par moi-même</option><option value="garage">en garage</option></select></label>
+            <label>Taux horaire (€/h)<input id="bTaux" type="number" min="0" step="5"></label>
+            <label>Marge imprévus (%)<input id="bMarge" type="number" min="0" max="100" step="5"></label>
+          </div>
+        </section>
+
+        <section class="card">
+          <header class="card-h"><span class="code">1</span><h3>Factures déjà payées</h3></header>
+          <label class="drop" id="bDrop"><input type="file" id="bFile" accept="image/*,application/pdf" multiple><b>Ajouter des factures</b><span>Photo ou PDF : clique ou glisse ici. Plusieurs fichiers d'un coup, c'est possible.</span></label>
+          <div class="actions"><button class="btn" type="button" id="bManual">Saisir une dépense à la main</button></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Fournisseur</th><th>Groupe</th><th style="text-align:right">Total TTC</th><th>Aperçu</th><th></th></tr></thead><tbody id="bFact"></tbody></table></div>
+        </section>
+
+        <section class="card">
+          <header class="card-h"><span class="code">2</span><h3>Ce que je veux encore changer</h3></header>
+          <textarea id="bWish" class="bwish" rows="5" placeholder="Ex. : je veux refaire les freins des 4 roues (tambours, mâchoires, cylindres, flexibles), changer les segments et les joints moteur, remplacer les 2 échangeurs et le silencieux, refaire l'allumage, et mettre 4 pneus neufs."></textarea>
+          <div class="actions"><button class="btn pri" type="button" id="bEst">Estimer avec l'IA</button><label class="src" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="bReplace" checked> remplacer l'estimation précédente (garde les postes manuels et faits)</label></div>
+          <p class="src" id="bEstMsg" aria-live="polite"></p>
+          <div class="tw"><table class="bplan"><thead><tr><th>Fait</th><th>Poste</th><th style="text-align:right">Fourchette</th><th></th></tr></thead><tbody id="bPlan"></tbody></table></div>
+          <div class="actions"><button class="btn" type="button" id="bAddPoste">Ajouter un poste à la main</button><button class="btn" type="button" id="bImport">Ajouter « Ma liste de pièces » comme poste</button></div>
+          <div class="info" id="bHyp" hidden></div>
+        </section>
+
+        <section class="card">
+          <header class="card-h"><span class="code">3</span><h3>Répartition par groupe</h3></header>
+          <div class="tw"><table><thead><tr><th>Groupe</th><th style="text-align:right">Payé</th><th style="text-align:right">Reste estimé</th><th style="width:34%"></th></tr></thead><tbody id="bGroups"></tbody></table></div>
+          <p class="src">Estimations hors frais de port, à partir des prix relevés le 6 novembre 2026. Corrige les fourchettes à la main quand tu as un devis.</p>
+        </section>
+      </div>
     </div>
 
     <div class="page" data-page="couples" hidden>
@@ -580,6 +663,7 @@ let h='<div class="sec">Atelier</div>'+
   '<a class="it" href="#couples"><span class="n">Nm</span>Couples de serrage</a>'+
   '<a class="it" href="#fiche"><span class="n">i</span>Fiche technique</a>'+
   '<a class="it" href="#liste"><span class="n">+</span>Ma liste de pièces</a>'+
+  '<a class="it" href="#budget"><span class="n">€</span>Budget travaux et factures</a>'+
   (window.claude&&window.claude.use?'':'<a class="it" href="#" data-ai-settings><span class="n">⚙</span>Réglages IA (clé Gemini)</a>')+
   '<div class="sec">Pièces par groupe</div>';
 Object.keys(D.chapters).forEach(c=>{
@@ -700,7 +784,7 @@ function show(){
   const hh=decodeURIComponent(location.hash.slice(1))||'accueil';
   let page=pages.find(p=>p.dataset.page===hh&&p!==dyn), cur=hh, ch=null;
   pages.forEach(p=>p.hidden=true);
-  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open()}
+  if(page){page.hidden=false;if(hh==='liste')renderList();if(hh==='photos')Photos.open();if(hh==='budget')Budget.open()}
   else{
     let html='';
     if(hh.startsWith('a-')&&byId[hh.slice(2)]){const v=byId[hh.slice(2)];html=pageView(v);ch=v.ch}
@@ -827,6 +911,9 @@ const Local=(()=>{
   const toB64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)});
   let okModel=null;
   async function call(body,signal){
+    try{return await call1(body,signal)}catch(e){if(!e||!['unavailable','rate_limited','network'].includes(e.code))throw e;await new Promise(r=>setTimeout(r,5000));if(signal&&signal.aborted)throw{code:'cancelled'};return call1(body,signal)}
+  }
+  async function call1(body,signal){
     const order=okModel?[okModel,...MODELS.filter(m=>m!==okModel)]:MODELS;let last=null;
     for(const m of order){
       let r;try{r=await fetch(API+m+':generateContent',{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':getKey()},body:JSON.stringify(body)})}
@@ -1093,6 +1180,8 @@ CONTEXTE : ${currentPage()}`;
       execute:({code})=>{const p=D.procs.find(x=>x.k.toLowerCase()===String(code||'').toLowerCase().trim());if(!p)throw new Error('Fiche inconnue. Codes : '+D.procs.map(x=>x.k).join(', '));return p.k+' — '+p.t+'\n'+strip(p.html).slice(0,9000)}},
     {name:'mes_photos',description:"Renvoie le résumé des analyses des photos que Paul a déposées dans l'atlas (zone, note d'état, pièces à changer).",
       execute:async()=>{if(!db)return [];const s=await db.collection('photos').get();return s.docs.map(d=>d.data()).filter(x=>x.analysis).slice(0,15).map(x=>({zone:x.zone||'',date:new Date(x.createdAt).toLocaleDateString('fr-FR'),note:x.note||'',vue:x.analysis.vue,etat:x.analysis.note_etat,resume:x.analysis.resume,a_changer:(x.analysis.a_changer||[]).map(a=>a.piece+(a.ref_vw?' ('+a.ref_vw+')':'')+' : '+a.priorite)}))}},
+    {name:'mon_budget',description:"Renvoie le budget travaux de Paul : budget max, déjà payé (factures), reste à faire estimé, postes prévus.",
+      execute:()=>Budget.summary()},
     {name:'ajouter_a_ma_liste',description:"Ajoute une pièce à la liste de commande de Paul, par sa référence VW (confirmée avec chercher_pieces). À utiliser seulement si Paul le demande.",
       inputSchema:{type:'object',properties:{ref_vw:{type:'string'},quantite:{type:'number'}},required:['ref_vw']},
       execute:({ref_vw,quantite})=>{const rs=byOem[nz(ref_vw)]||[];if(!rs.length)throw new Error('Référence absente du catalogue');const r=rs[0];list[r]=Math.max(1,Math.round(+quantite||1));saveList();document.querySelectorAll(`.addb[data-ref="${r}"]`).forEach(b=>{b.setAttribute('aria-pressed','true');b.textContent='✓'});return 'Ajouté : '+P[r][0]}}
@@ -1141,6 +1230,245 @@ CONTEXTE : ${currentPage()}`;
     finally{ctl=null;send.hidden=false;stop.hidden=true;img=null;pic.value='';picName.textContent=''}
   });
   return {open};
+})();
+
+/* ---------- budget travaux : factures payées + travaux prévus estimés ---------- */
+const Budget=(()=>{
+  const $=id=>document.getElementById(id);
+  const GROUPES=[...Object.values(D.chapters).map(c=>c[0]),'Outillage et consommables','Main-d\'œuvre garage','Divers'];
+  let rt=null, local=false, started=false, facts=[], plan={postes:[],hypotheses:[]}, regl={max:0,mode:'moi',taux:60,marge:15}, busy={};
+  const num=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+  const e0=n=>eur(Math.round(num(n)*100)/100);
+  const fmtD=s=>{if(!s)return '—';const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})};
+  const imgSrc=id=>id?(local?Local.blobUrl(id):'/_blob/'+id):'';
+
+  async function getRT(){
+    if(window.claude&&window.claude.use){const [db,assets,sample]=await Promise.all([claude.use('db'),claude.use('assets'),claude.use('sample')]);return db?{db,assets,sample,local:false}:null}
+    if(Local.active())return {...Local.runtime(),local:true};
+    return null;
+  }
+  async function open(){
+    if(started){render();return}
+    started=true;
+    rt=await getRT();
+    if(!rt){started=false;$('bState').innerHTML=(window.claude&&window.claude.use)?'<p class="warn"><b>Stockage indisponible</b>Ouvre l\'atlas connecté à ton compte Claude.</p>':'<p class="warn"><b>Clé Gemini à coller</b>Sur cette version, le budget est gardé dans ce navigateur et les factures sont lues par Gemini. <a href="#" data-ai-settings>Coller ma clé Gemini</a></p>';return}
+    local=rt.local;
+    $('bState').innerHTML=local?'<p class="info"><b>Mode Gemini</b>Budget et factures gardés dans le navigateur de cet appareil. <a href="#" data-ai-settings>Réglages IA</a></p>':'';
+    $('bApp').hidden=false;
+    try{const r=await rt.db.doc('budget/reglages').get();const d=r.data();if(d)regl={...regl,...d}}catch(e){}
+    try{const p=await rt.db.doc('budget/plan').get();const d=p.data();if(d&&Array.isArray(d.postes))plan=d}catch(e){}
+    $('bMax').value=regl.max||'';$('bMode').value=regl.mode;$('bTaux').value=regl.taux;$('bMarge').value=regl.marge;
+    rt.db.collection('factures').orderBy('createdAt','desc').onSnapshot(async s=>{facts=s.docs.map(d=>({id:d.id,...d.data()}));if(local)await Local.preload(facts.map(f=>f.preview).filter(Boolean));render()},err=>{$('bState').innerHTML='<p class="warn"><b>Erreur</b>'+esc(err.message||err.code)+'</p>'});
+    render();
+  }
+  const saveRegl=()=>rt&&rt.db.doc('budget/reglages').set(regl).catch(()=>{});
+  const savePlan=()=>rt&&rt.db.doc('budget/plan').set({...plan,updatedAt:Date.now()}).catch(()=>{});
+
+  /* ----- chiffres ----- */
+  function totals(){
+    const paye=facts.reduce((a,f)=>a+num(f.data&&f.data.total_ttc),0);
+    const rest=plan.postes.filter(p=>!p.fait);
+    const mg=1+num(regl.marge)/100;
+    const min=rest.reduce((a,p)=>a+num(p.min),0), max=rest.reduce((a,p)=>a+num(p.max),0)*mg;
+    return {paye,min,max,projMin:paye+min,projMax:paye+max,budget:num(regl.max)};
+  }
+  function byGroup(){
+    const g={};const add=(k,f,v)=>{k=k||'Divers';(g[k]=g[k]||{paye:0,min:0,max:0})[f]+=v};
+    facts.forEach(f=>{const d=f.data||{};if(Array.isArray(d.repartition)&&d.repartition.length)d.repartition.forEach(r=>add(r.groupe,'paye',num(r.montant)));else add(d.groupe,'paye',num(d.total_ttc))});
+    plan.postes.filter(p=>!p.fait).forEach(p=>{add(p.groupe,'min',num(p.min));add(p.groupe,'max',num(p.max))});
+    return Object.entries(g).sort((a,b)=>(b[1].paye+b[1].max)-(a[1].paye+a[1].max));
+  }
+
+  /* ----- rendu ----- */
+  function render(){
+    if(!rt)return;
+    const t=totals(), over=t.budget&&t.projMax>t.budget, overMin=t.budget&&t.projMin>t.budget;
+    $('bKpi').innerHTML=`
+      <div><span>Déjà payé</span><b>${e0(t.paye)}</b><em>${facts.length} facture${facts.length>1?'s':''}</em></div>
+      <div><span>Reste à faire (estimé)</span><b>${e0(t.min)} – ${e0(t.max)}</b><em>${plan.postes.filter(p=>!p.fait).length} postes · imprévus +${num(regl.marge)} %</em></div>
+      <div><span>Coût total projeté</span><b>${e0(t.projMin)} – ${e0(t.projMax)}</b><em>payé + reste à faire</em></div>
+      <div class="${overMin?'bad':over?'warnk':t.budget?'okk':''}"><span>Budget max</span><b>${t.budget?e0(t.budget):'à fixer'}</b><em>${t.budget?(overMin?'dépassé de '+e0(t.projMin-t.budget)+' au minimum':over?'risque de dépassement : jusqu\'à '+e0(t.projMax-t.budget):'marge restante : '+e0(t.budget-t.projMax)):'saisis-le à droite'}</em></div>`;
+    const scale=Math.max(t.budget,t.projMax,1);
+    $('bBar').innerHTML=`<div class="seg paid" style="width:${t.paye/scale*100}%" title="Payé ${e0(t.paye)}"></div><div class="seg est" style="width:${t.min/scale*100}%" title="Reste minimum ${e0(t.min)}"></div><div class="seg est2" style="width:${(t.max-t.min)/scale*100}%" title="Fourchette haute"></div>${t.budget?`<i class="cap" style="left:${t.budget/scale*100}%" title="Budget max"></i>`:''}`;
+    // factures
+    const busyF=Object.entries(busy).filter(([k])=>k.startsWith('f-new')).map(([,m])=>`<tr><td colspan="6" class="src">${esc(m)}</td></tr>`).join('');
+    $('bFact').innerHTML=busyF+(facts.length?facts.map(f=>{const d=f.data||{};return `<tr data-f="${f.id}">
+      <td class="n">${fmtD(d.date)}</td>
+      <td><b>${esc(d.fournisseur||f.name||'Facture')}</b>${d.numero?`<small>n° ${esc(d.numero)}</small>`:''}${busy[f.id]?`<small class="busy">${esc(busy[f.id])}</small>`:''}${!f.data&&!busy[f.id]?'<small>Pas encore lue</small>':''}</td>
+      <td>${esc(d.groupe||'—')}</td>
+      <td class="n" style="text-align:right">${d.total_ttc!=null?e0(d.total_ttc):'—'}</td>
+      <td>${f.preview?`<img class="fthumb" src="${imgSrc(f.preview)}" alt="Aperçu de la facture">`:''}</td>
+      <td class="fact-act"><button class="btn" type="button" data-fopen="${f.id}">Détail</button></td></tr>
+      <tr class="fdet" data-fd="${f.id}" hidden><td colspan="6">${factDetail(f)}</td></tr>`}).join(''):(busyF?'':'<tr><td colspan="6" class="empty">Aucune facture. Glisse une photo ou un PDF de facture ci-dessus, ou ajoute-la à la main.</td></tr>'));
+    // plan
+    $('bPlan').innerHTML=plan.postes.length?plan.postes.map((p,i)=>`<tr class="${p.fait?'done':''}">
+      <td><input type="checkbox" data-fait="${i}" ${p.fait?'checked':''} aria-label="Poste fait"></td>
+      <td><b>${esc(p.intitule)}</b><small>${esc(p.groupe||'')}${p.commentaire?' · '+esc(p.commentaire):''}</small>
+        ${(p.pieces||[]).length?`<details><summary>${p.pieces.length} pièce${p.pieces.length>1?'s':''}${p.main_oeuvre&&num(p.main_oeuvre.heures)?` · ${num(p.main_oeuvre.heures)} h de main-d'œuvre`:''}</summary><ul class="plist">${p.pieces.map(x=>`<li>${num(x.qte)||1} × ${esc(x.designation)} ${x.ref_vw?refLink(x.ref_vw):''} <span class="n">${x.prix_unitaire?e0(x.prix_unitaire):''}</span> <small>${esc(x.source||'')}</small></li>`).join('')}</ul></details>`:''}</td>
+      <td class="n" style="text-align:right"><input class="mn" type="number" min="0" step="1" value="${Math.round(num(p.min))}" data-min="${i}" aria-label="Minimum"> – <input class="mn" type="number" min="0" step="1" value="${Math.round(num(p.max))}" data-max="${i}" aria-label="Maximum"> €</td>
+      <td><button class="btn" type="button" data-pdel="${i}" aria-label="Supprimer le poste">✕</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">Aucun poste. Décris tes travaux au-dessus et lance l\'estimation, ou ajoute un poste à la main.</td></tr>';
+    $('bHyp').innerHTML=(plan.hypotheses||[]).length?'<b>Hypothèses de l\'estimation</b><ul>'+plan.hypotheses.map(h=>`<li>${esc(h)}</li>`).join('')+'</ul>':'';
+    $('bHyp').hidden=!(plan.hypotheses||[]).length;
+    // groupes
+    const gs=byGroup(), gmax=Math.max(1,...gs.map(([,v])=>v.paye+v.max));
+    $('bGroups').innerHTML=gs.length?gs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n" style="text-align:right">${e0(v.paye)}</td><td class="n" style="text-align:right">${v.max?e0(v.min)+' – '+e0(v.max):'—'}</td><td class="gbar"><span class="paid" style="width:${v.paye/gmax*100}%"></span><span class="est" style="width:${v.max/gmax*100}%"></span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">La répartition apparaîtra avec les premières factures ou la première estimation.</td></tr>';
+    $('bTaux').closest('label').hidden=$('bMode').value!=='garage';
+  }
+  function refLink(ref){const rs=byOem[nz(ref)]||[];if(!rs.length)return `<span class="mono">${esc(ref)}</span>`;const r=rs[0],w=(where[r]||[])[0];return `<span class="mono">${esc(ref)}</span>${w?` <a href="#a-${w[0]}" data-go="${r}">fiche ↗</a>`:''} ${addBtn(r)}`}
+  function factDetail(f){
+    const d=f.data||{};
+    const lignes=(d.lignes||[]).map(l=>`<tr><td>${esc(l.designation)}</td><td class="n">${esc(l.ref||'')}</td><td class="n">${esc(l.qte??'')}</td><td class="n" style="text-align:right">${l.prix_ttc!=null?e0(l.prix_ttc):''}</td></tr>`).join('');
+    return `<div class="fdetail">
+      ${f.preview?`<a href="${imgSrc(f.preview)}" target="_blank" rel="noopener"><img src="${imgSrc(f.preview)}" alt="Facture"></a>`:''}
+      <div class="fform">
+        <div class="frow"><label>Fournisseur<input data-k="fournisseur" value="${esc(d.fournisseur||'')}"></label><label>Date<input type="date" data-k="date" value="${esc(d.date||'')}"></label></div>
+        <div class="frow"><label>Total TTC (€)<input type="number" step="0.01" data-k="total_ttc" value="${d.total_ttc!=null?esc(d.total_ttc):''}"></label><label>Groupe<select data-k="groupe">${GROUPES.map(g=>`<option ${g===d.groupe?'selected':''}>${esc(g)}</option>`).join('')}</select></label></div>
+        <label>Remarque<input data-k="remarque" value="${esc(d.remarque||'')}"></label>
+        ${lignes?`<div class="tw"><table><thead><tr><th>Ligne</th><th>Réf.</th><th>Qté</th><th style="text-align:right">TTC</th></tr></thead><tbody>${lignes}</tbody></table></div>`:''}
+        <div class="actions"><button class="btn pri" type="button" data-fsave="${f.id}">Enregistrer</button>${f.asset&&rt.sample?`<button class="btn" type="button" data-fread="${f.id}">Relire avec l'IA</button>`:''}<button class="btn" type="button" data-fdel="${f.id}">Supprimer</button></div>
+      </div></div>`;
+  }
+
+  /* ----- factures : dépôt, lecture ----- */
+  let pdfReady=null;
+  function loadPdf(){
+    return pdfReady||(pdfReady=new Promise((res,rej)=>{
+      const add=src=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ko(new Error('pdf.js'));document.head.appendChild(s)});
+      add('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js').then(()=>add('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js')).then(()=>res(window.pdfjsLib)).catch(rej);
+    }));
+  }
+  async function pdfToJpegs(file,maxPages=3){
+    const lib=await loadPdf();
+    const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise;
+    const out=[];
+    for(let i=1;i<=Math.min(pdf.numPages,maxPages);i++){
+      const pg=await pdf.getPage(i);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2.2,1600/vp0.width)});
+      const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+      await pg.render({canvasContext:ctx,viewport:vp}).promise;
+      out.push(await new Promise(r=>c.toBlob(r,'image/jpeg',.85)));
+    }
+    return out;
+  }
+  async function shrinkImg(file){
+    try{const bmp=await createImageBitmap(file);const k=Math.min(1,2200/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(b=>r(b||file),'image/jpeg',.88))}catch(e){return file}
+  }
+  async function addFiles(files){
+    for(const file of files){
+      const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name);
+      if(!isPdf&&!/^image\//.test(file.type))continue;
+      const k='f-new'+Math.random().toString(36).slice(2);busy[k]='Envoi de '+file.name+'…';render();
+      try{
+        let pages=[];
+        if(isPdf){busy[k]='Lecture du PDF '+file.name+'…';render();pages=await pdfToJpegs(file)}else pages=[await shrinkImg(file)];
+        if(!pages.length)throw new Error('PDF vide');
+        const prev=await rt.assets.upload(pages[0],{type:'image/jpeg'});
+        const pageIds=[prev.id];for(const pg of pages.slice(1))pageIds.push((await rt.assets.upload(pg,{type:'image/jpeg'})).id);
+        let orig=null;if(isPdf){try{orig=(await rt.assets.upload(file,{type:'application/pdf'})).id}catch(e){}}
+        const ref=rt.db.collection('factures').doc();
+        await ref.set({name:file.name,asset:orig||prev.id,preview:prev.id,pages:pageIds,createdAt:Date.now(),data:null});
+        delete busy[k];
+        if(rt.sample)readInvoice({id:ref.id,pages:pageIds,name:file.name},pages);
+      }catch(e){busy[k]='Échec : '+(e.message||e.code||e);render();setTimeout(()=>{delete busy[k];render()},6000)}
+      render();
+    }
+  }
+  const PROMPT_F=`Tu lis une facture ou un ticket de caisse lié à la restauration d'une VW Coccinelle 1302 de 1972. Relève les informations exactement comme elles sont imprimées (n'invente rien ; laisse vide ce qui est illisible).
+Classe la dépense dans un de ces groupes : ${GROUPES.join(' ; ')}. Si la facture mélange plusieurs groupes, donne la répartition.
+Réponds uniquement avec un objet JSON :
+{"fournisseur":"","date":"AAAA-MM-JJ","numero":"","total_ttc":0,"groupe":"","type":"pièces|main-d'œuvre|mixte|outillage","lignes":[{"designation":"","ref":"","qte":1,"prix_ttc":0}],"repartition":[{"groupe":"","montant":0}],"remarque":"une phrase si utile"}`;
+  async function readInvoice(f,blobs){
+    if(!rt.sample)return;
+    busy[f.id]=(local?'Gemini':'Claude')+' lit la facture…';render();
+    try{
+      if(!blobs){blobs=[];for(const id of (f.pages||[f.preview]).slice(0,3)){blobs.push(local?await Local.getBlob(id):await fetch('/_blob/'+id).then(r=>r.blob()))}}
+      const res=await rt.sample.json(PROMPT_F,{images:blobs.slice(0,3)});
+      if(!res||typeof res!=='object')throw{code:'invalid_json'};
+      res.total_ttc=res.total_ttc==null?null:num(res.total_ttc);
+      if(!GROUPES.includes(res.groupe))res.groupe='Divers';
+      await rt.db.collection('factures').doc(f.id).update({data:res,readAt:Date.now()});
+      delete busy[f.id];
+    }catch(e){
+      const m={bad_key:'clé Gemini refusée',unavailable:'IA surchargée, relance plus tard',rate_limited:'trop de demandes, relance plus tard',not_granted:'autorise Claude pour lire la facture',invalid_json:'lecture illisible, complète à la main'}[e&&e.code]||'lecture interrompue';
+      busy[f.id]='Lecture impossible : '+m;render();setTimeout(()=>{delete busy[f.id];render()},10000);return;
+    }
+    render();
+  }
+
+  /* ----- estimation des travaux ----- */
+  const CAR='VW Coccinelle 1302 berline de 1972, moteur AB 1 285 cm³ 44 ch, allumeur Bosch 113 905 205 K, Solex 31 PICT-3, dynamo 12 V, train avant McPherson avec tambours Ø 248, essieu arrière double cardan avec tambours Ø 230, maître-cylindre tandem. Moteur déposé (segments à changer), freins des 4 roues à refaire, échangeurs corrodés.';
+  const tools=()=>[
+    {name:'chercher_pieces',description:"Cherche dans le catalogue des pièces de la 1302 par nom français ou référence VW. Renvoie jusqu'à 12 pièces avec réf. VW, désignation, prix Mecatechnic et Dream Machine.",
+      inputSchema:{type:'object',properties:{q:{type:'string'}},required:['q']},
+      execute:({q})=>findParts(String(q||''),12).map(([r,p])=>({ref_vw:oem1(p),designation:p[0],sous_ensemble:where[r]?byId[where[r][0][0]].t:'',mecatechnic:(p[3]||[])[0]?{ref:p[3][0][1],prix:p[3][0][2]}:null,dream_machine:(p[4]||[])[0]?{ref:p[4][0][1],prix:p[4][0][2]}:null}))},
+    {name:'factures_payees',description:"Liste des factures déjà payées (fournisseur, date, total, lignes) pour ne pas compter deux fois ce qui est déjà acheté.",
+      execute:()=>facts.filter(f=>f.data).map(f=>({fournisseur:f.data.fournisseur,date:f.data.date,total:f.data.total_ttc,groupe:f.data.groupe,lignes:(f.data.lignes||[]).slice(0,25).map(l=>l.designation+(l.ref?' ('+l.ref+')':''))}))},
+    {name:'ma_liste',description:"Pièces que Paul a déjà mises dans sa liste de commande dans l'atlas.",
+      execute:()=>Object.keys(list).filter(r=>P[r]).map(r=>({qte:list[r],designation:P[r][0],ref_vw:oem1(P[r]),meilleur_prix:(best(P[r])||{}).p||null}))}
+  ];
+  async function estimate(){
+    const txt=$('bWish').value.trim();
+    if(!txt){$('bEstMsg').textContent='Décris d\'abord ce que tu veux changer.';return}
+    if(!rt.sample){$('bEstMsg').textContent='L\'estimation demande l\'IA (version Claude, ou clé Gemini sur la version GitHub).';return}
+    const btn=$('bEst');btn.disabled=true;$('bEstMsg').textContent=(local?'Gemini':'Claude')+' chiffre tes travaux…';
+    const mode=regl.mode==='garage'?`Les travaux seront faits en garage à ${num(regl.taux)} € HT/h : compte la main-d'œuvre (temps barèmes réalistes pour une Coccinelle).`:`Paul fait les travaux lui-même : pas de main-d'œuvre, mais pense aux consommables (liquide de frein, huile, joints, graisse, visserie) et à l'outillage spécifique s'il en faut.`;
+    const prompt=`Tu es chef d'atelier spécialiste des VW à moteur refroidi par air. Paul restaure sa voiture : ${CAR}
+Voici ce qu'il veut faire, dans ses mots :
+"""${txt}"""
+${mode}
+Chiffre les travaux poste par poste. Pour les pièces, cherche les vraies références et les prix avec l'outil chercher_pieces (prends le prix le plus bas trouvé, n'invente jamais de référence ; si la pièce n'est pas au catalogue, mets ref_vw vide et source "estimation"). Consulte factures_payees pour ne pas recompter ce qui est déjà acheté, et ma_liste pour ce qu'il a prévu de commander.
+Donne pour chaque poste une fourchette : min = pièces les moins chères trouvées, max = qualité supérieure ou pièces annexes souvent découvertes au démontage. Les frais de port ne sont pas comptés.
+Réponds uniquement avec un objet JSON :
+{"postes":[{"groupe":"un de : ${GROUPES.join(' | ')}","intitule":"","pieces":[{"designation":"","ref_vw":"","qte":1,"prix_unitaire":0,"source":"Mecatechnic|Dream Machine|estimation"}],"main_oeuvre":{"heures":0,"taux":0},"min":0,"max":0,"commentaire":""}],"hypotheses":["ce que tu as supposé, en une phrase chacune"]}`;
+    try{
+      const res=await rt.sample.json(prompt,{tools:tools()});
+      if(!res||!Array.isArray(res.postes))throw{code:'invalid_json'};
+      const keep=$('bReplace').checked?plan.postes.filter(p=>p.manuel||p.fait):plan.postes;
+      plan={postes:[...keep,...res.postes.map(p=>({...p,min:num(p.min),max:Math.max(num(p.max),num(p.min)),fait:false,source:'ia',demande:txt.slice(0,200)}))],hypotheses:(res.hypotheses||[]).slice(0,10)};
+      await savePlan();$('bEstMsg').textContent=`${res.postes.length} postes ajoutés. Corrige les montants si besoin : ils sont modifiables.`;
+    }catch(e){
+      try{console.warn('estimation',e&&e.code,e&&e.message,(e&&e.text||'').slice(0,300))}catch(_){}
+      $('bEstMsg').textContent={bad_key:'Clé Gemini refusée : vérifie-la dans Réglages IA.',unavailable:'L\'IA est surchargée : réessaie dans une minute.',rate_limited:'Trop de demandes : réessaie dans une minute.',not_granted:'Autorise Claude pour cet atlas, puis relance.',invalid_json:'Réponse illisible : relance l\'estimation.'}[e&&e.code]||'Estimation interrompue : relance.';
+    }finally{btn.disabled=false;render()}
+  }
+
+  /* ----- événements ----- */
+  const fi=$('bFile'), drop=$('bDrop');
+  fi.addEventListener('change',()=>{if(fi.files.length)addFiles([...fi.files]);fi.value=''});
+  ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+  ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
+  drop.addEventListener('drop',e=>{if(rt&&e.dataTransfer.files.length)addFiles([...e.dataTransfer.files])});
+  $('bMax').addEventListener('change',()=>{regl.max=num($('bMax').value);saveRegl();render()});
+  $('bMode').addEventListener('change',()=>{regl.mode=$('bMode').value;saveRegl();render()});
+  $('bTaux').addEventListener('change',()=>{regl.taux=num($('bTaux').value)||60;saveRegl();render()});
+  $('bMarge').addEventListener('change',()=>{regl.marge=Math.max(0,num($('bMarge').value));saveRegl();render()});
+  $('bEst').addEventListener('click',estimate);
+  $('bManual').addEventListener('click',async()=>{const ref=rt.db.collection('factures').doc();await ref.set({name:'Saisie manuelle',createdAt:Date.now(),data:{fournisseur:'',date:new Date().toISOString().slice(0,10),total_ttc:0,groupe:'Divers',lignes:[]}});setTimeout(()=>{const b=document.querySelector(`[data-fopen="${ref.id}"]`);if(b)b.click()},300)});
+  $('bAddPoste').addEventListener('click',()=>{plan.postes.push({groupe:'Divers',intitule:'Nouveau poste',min:0,max:0,fait:false,manuel:true,pieces:[]});savePlan();render();const ins=document.querySelectorAll('[data-min]');ins[ins.length-1]?.focus()});
+  $('bImport').addEventListener('click',()=>{
+    const refs=Object.keys(list).filter(r=>P[r]);if(!refs.length){$('bEstMsg').textContent='Ta liste de pièces est vide.';return}
+    let tot=0;const pieces=refs.map(r=>{const b=best(P[r]);const pu=b?b.p:0;tot+=pu*list[r];return{designation:P[r][0],ref_vw:oem1(P[r]),qte:list[r],prix_unitaire:pu,source:b?b.s:'estimation'}});
+    plan.postes.push({groupe:'Divers',intitule:'Commande « Ma liste de pièces »',pieces,min:Math.round(tot),max:Math.round(tot*1.1),fait:false,manuel:true,commentaire:'au meilleur prix relevé, +10 % en haut de fourchette'});
+    savePlan();render();$('bEstMsg').textContent='Ta liste a été ajoutée comme poste.';
+  });
+  $('bPlan').addEventListener('change',e=>{const t=e.target;
+    if(t.dataset.fait!=null){plan.postes[+t.dataset.fait].fait=t.checked}
+    else if(t.dataset.min!=null){plan.postes[+t.dataset.min].min=num(t.value)}
+    else if(t.dataset.max!=null){plan.postes[+t.dataset.max].max=num(t.value)}
+    else return;savePlan();render()});
+  $('bPlan').addEventListener('click',e=>{const d=e.target.closest('[data-pdel]');if(d){if(!d.dataset.c){d.dataset.c=1;d.textContent='Sûr ?';return}plan.postes.splice(+d.dataset.pdel,1);savePlan();render()}
+    const go=e.target.closest('a[data-go]');if(go)pendingRef=go.dataset.go});
+  $('bFact').addEventListener('click',async e=>{
+    const o=e.target.closest('[data-fopen]');if(o){const r=document.querySelector(`[data-fd="${o.dataset.fopen}"]`);r.hidden=!r.hidden;return}
+    const sv=e.target.closest('[data-fsave]');if(sv){const id=sv.dataset.fsave,f=facts.find(x=>x.id===id),box=sv.closest('.fform');const d={...(f.data||{})};
+      box.querySelectorAll('[data-k]').forEach(i=>{d[i.dataset.k]=i.dataset.k==='total_ttc'?num(i.value):i.value});d.repartition=[];
+      await rt.db.collection('factures').doc(id).update({data:d});return}
+    const rd=e.target.closest('[data-fread]');if(rd){const f=facts.find(x=>x.id===rd.dataset.fread);if(f)readInvoice(f);return}
+    const dl=e.target.closest('[data-fdel]');if(dl){if(!dl.dataset.c){dl.dataset.c=1;dl.textContent='Confirmer la suppression';return}
+      const f=facts.find(x=>x.id===dl.dataset.fdel);await rt.db.collection('factures').doc(f.id).delete();for(const id of new Set([f.asset,...(f.pages||[])]))if(id)rt.assets.delete(id).catch(()=>{});return}
+    const im=e.target.closest('img.fthumb');if(im){const lb=document.createElement('div');lb.className='lb';lb.innerHTML=`<img src="${im.src}" alt="Facture">`;lb.addEventListener('click',()=>lb.remove());document.body.appendChild(lb)}
+  });
+  const summary=()=>{const t=totals();return{budget_max:t.budget||null,deja_paye:Math.round(t.paye),reste_estime:[Math.round(t.min),Math.round(t.max)],total_projete:[Math.round(t.projMin),Math.round(t.projMax)],nb_factures:facts.length,postes:plan.postes.map(p=>({poste:p.intitule,groupe:p.groupe,min:Math.round(num(p.min)),max:Math.round(num(p.max)),fait:!!p.fait}))}};
+  return {open,summary:async()=>{if(!started)await open();return summary()}};
 })();
 
 window.addEventListener('hashchange',show);
